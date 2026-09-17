@@ -1,7 +1,7 @@
 # Roadmap — task-router
 
 **Current stage: Build — Phase B in progress**
-**Next up:** S7's CODE is done (`battery.py`, `feedback.py`, `train.py --version 2`, tests green) but the live paid battery run awaits explicit "go" — do not run it until the operator says so. Then S8. Operator directive 2026-09-18: complete S4–S8 before the weekly reset; pace around the 5-hour window.
+**Next up:** S8 (README + ADR recap + Jaeger screenshot + committed demo fixture). Operator HELD the live battery (2026-09-18): S7 code is merged but not run; README will state routing/saving numbers are pending until the operator says "go". Complete S8 before the weekly reset; pace around the 5-hour window.
 
 Lifecycle: Define → Plan → Build → Verify → Review → Ship.
 Agents: read this file at session start, state the current stage and next unchecked item before any other work, and update this file (checkboxes + Current stage + Next up) before ending. Product and design decisions belong to the user — elicit them with questions, never decide for them.
@@ -33,7 +33,7 @@ Exit: numbered vertical slices exist and the user approves. ⏳ Awaiting Build s
   - [x] *(chore)* src-layout packaging so scripts import standalone — PR #4 (`ff1186e`)
   - [x] **S3** Synchronous API (`/v1/completions`, models, stats, routing-config) + OTel SQLite tracing — PR #5 (`5e06caf`) — **Phase A exit ✅**
   - [x] **S4** Background judge (tier above, sampled) + one-step escalation — PR #6 (`aa927e8`). Operator labels (60) committed; classifier v1 trained: held-out 0.80, CV 0.70±0.03 (⚠ only 2 opus labels — opus effectively unlearnable, 5-fold degraded to 2-fold; more opus/sonnet labels would help, non-blocking).
-  - [ ] **S5** Read API (`GET /runs`, `/runs/{id}/spans`, `POST /replay`) — Phase B
+  - [x] **S5** Read API (`GET /runs`, `/runs/{id}/spans`, `POST /replay` forced-tier diff) — PR #7 (`95dd11d`)
   - [x] **S6** React UI (list → waterfall → replay-diff → stats) — PR #8 (`1b385aa`); built in 3 chunks (scaffold/pages/waterfall); `ui` CI now a required check (Node 22)
   - [x] **S7 (code only)** `battery.py` (resumable, retry/backoff, labelled-rows-only, `--dry-run`) + `feedback.py` (weight-3 escalation feedback) + `train.py --version 2` (same held-out ids as v1, no improvement claim) — tests green, NOT run against real models. ⏳ The live paid battery run itself still awaits explicit operator "go" before executing.
   - [ ] **S8** README (honest numbers) + ADRs recap + Jaeger screenshot + committed demo fixture — Phase B
