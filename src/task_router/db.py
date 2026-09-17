@@ -41,7 +41,8 @@ CREATE TABLE IF NOT EXISTS runs (
     status TEXT NOT NULL,
     total_duration_ms INTEGER,
     cost_all_tiers TEXT,
-    forced_tier TEXT
+    forced_tier TEXT,
+    judge_cost REAL NOT NULL DEFAULT 0
 )
 """
 
@@ -88,8 +89,19 @@ def get_connection(path: Optional[Path] = None) -> sqlite3.Connection:
     return conn
 
 
+def _ensure_column(conn: sqlite3.Connection, table: str, column: str, declaration: str) -> None:
+    """Add `column` to `table` if a pre-S4 DB file was created before this
+    column existed. CREATE TABLE IF NOT EXISTS (above) only covers brand-new
+    files; this covers the on-disk audit.sqlite an earlier slice already
+    created."""
+    existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+    if column not in existing:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {declaration}")
+
+
 def init_db(conn: sqlite3.Connection) -> None:
     conn.execute(RUNS_SCHEMA)
     conn.execute(SPANS_SCHEMA)
     conn.execute(REPLAYS_SCHEMA)
+    _ensure_column(conn, "runs", "judge_cost", "REAL NOT NULL DEFAULT 0")
     conn.commit()

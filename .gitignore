@@ -22,6 +22,9 @@ data/audit.sqlite
 # Run artifacts
 runs/
 
+# Trained classifier artifacts (regenerable via train.py, not committed)
+models/
+
 # Research notes — intentionally kept local, never committed
 docs/research/
 
