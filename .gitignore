@@ -1,0 +1,41 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+dist/
+
+# Environment
+.env
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+data/audit.sqlite
+
+# S8 demo fixture is committed on purpose — negate the DB ignore above for it
+!data/fixtures/
+!data/fixtures/**
+
+# Run artifacts
+runs/
+
+# Research notes — intentionally kept local, never committed
+docs/research/
+
+# Node / React (S6 UI)
+node_modules/
+coverage/
+.vercel/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Claude Code local settings
+.claude/settings.local.json
+.claude/launch.json
