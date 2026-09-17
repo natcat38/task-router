@@ -167,3 +167,126 @@ def test_main_trains_and_saves_on_synthetic_labelled_data(tmp_path, capsys):
     assert (model_dir / "classifier_v1.joblib").exists()
     captured = capsys.readouterr()
     assert "n (labelled) = 30" in captured.out
+
+
+# --- S7: --version 2 (feedback rows, same held-out ids as v1) --------------
+
+
+def _make_feedback_rows():
+    return [
+        {
+            "id": "feedback-r1",
+            "tier": "sonnet",
+            "use_case": "misc",
+            "prompt": "Summarise this near-duplicate escalated thread in two sentences.",
+            "trap": False,
+            "notes": "S7 feedback: escalated from run r1",
+            "weight": 3,
+        },
+    ]
+
+
+def test_split_held_out_is_seeded_and_reproducible():
+    rows = _make_synthetic_rows()
+    labelled = train.filter_labelled(rows)
+
+    _train_a, held_out_a = train.split_held_out(labelled, seed=42)
+    _train_b, held_out_b = train.split_held_out(labelled, seed=42)
+
+    assert {r["id"] for r in held_out_a} == {r["id"] for r in held_out_b}
+    assert len(held_out_a) + len(_train_a) == len(labelled)
+
+
+def test_feedback_rows_are_weighted_in_training_never_in_held_out():
+    rows = _make_synthetic_rows()
+    labelled = train.filter_labelled(rows)
+    feedback_rows = _make_feedback_rows()
+
+    results = train.train_and_evaluate(labelled, seed=42, feedback_rows=feedback_rows)
+
+    assert "feedback-r1" not in results["held_out_ids"]
+    assert results["n_feedback"] == 1
+    assert results["n"] == len(labelled)  # n counts original labelled rows, not feedback
+
+
+def test_v2_evaluates_on_same_held_out_ids_as_v1_with_no_improvement_claim():
+    rows = _make_synthetic_rows()
+    labelled = train.filter_labelled(rows)
+    feedback_rows = _make_feedback_rows()
+
+    comparison = train.train_v1_and_v2(labelled, feedback_rows, seed=42)
+
+    assert comparison["v1"]["held_out_ids"] == comparison["v2"]["held_out_ids"]
+    assert comparison["v1"]["n_feedback"] == 0
+    assert comparison["v2"]["n_feedback"] == 1
+
+    # The function reports BOTH metrics sets and nowhere asserts or flags
+    # that either one is "better" -- no verdict key exists anywhere.
+    assert set(comparison) == {"v1", "v2"}
+    for version in ("v1", "v2"):
+        for key in ("held_out_accuracy", "cv_mean", "cv_std", "n_folds", "model", "held_out_ids"):
+            assert key in comparison[version]
+
+
+def test_load_feedback_returns_empty_list_when_file_missing(tmp_path):
+    assert train.load_feedback(tmp_path / "does_not_exist.json") == []
+
+
+def test_load_feedback_reads_written_file(tmp_path):
+    path = tmp_path / "feedback.json"
+    rows = _make_feedback_rows()
+    path.write_text(json.dumps(rows), encoding="utf-8")
+
+    assert train.load_feedback(path) == rows
+
+
+def test_main_version_2_prints_both_v1_and_v2_without_improvement_verdict(tmp_path, capsys):
+    rows = _make_synthetic_rows()
+    prompts_path = tmp_path / "prompts.json"
+    prompts_path.write_text(json.dumps(rows), encoding="utf-8")
+    feedback_path = tmp_path / "feedback.json"
+    feedback_path.write_text(json.dumps(_make_feedback_rows()), encoding="utf-8")
+    model_dir = tmp_path / "models"
+
+    exit_code = train.main(
+        [
+            "--prompts-path", str(prompts_path),
+            "--feedback-path", str(feedback_path),
+            "--model-dir", str(model_dir),
+            "--version", "2",
+        ]
+    )
+
+    assert exit_code == 0
+    assert (model_dir / "classifier_v2.joblib").exists()
+    assert not (model_dir / "classifier_v1.joblib").exists()  # v2 run saves only v2
+
+    out = capsys.readouterr().out.lower()
+    assert "v1 (no feedback)" in out
+    assert "v2 (+1 weighted feedback rows)" in out
+    # The disclaimer itself uses the word "better" to explicitly deny a
+    # verdict -- this checks that exact disclaimer is present, not that the
+    # word never appears (which the honest disclaimer necessarily uses).
+    assert "no claim that v2 is better" in out
+
+
+def test_main_version_2_with_no_feedback_file_still_runs(tmp_path, capsys):
+    """--version 2 before any escalation has ever been confirmed passing
+    (no feedback.json yet) is a legitimate v2-equals-v1-input run, not an
+    error."""
+    rows = _make_synthetic_rows()
+    prompts_path = tmp_path / "prompts.json"
+    prompts_path.write_text(json.dumps(rows), encoding="utf-8")
+    model_dir = tmp_path / "models"
+
+    exit_code = train.main(
+        [
+            "--prompts-path", str(prompts_path),
+            "--feedback-path", str(tmp_path / "no_feedback_here.json"),
+            "--model-dir", str(model_dir),
+            "--version", "2",
+        ]
+    )
+
+    assert exit_code == 0
+    assert (model_dir / "classifier_v2.joblib").exists()
