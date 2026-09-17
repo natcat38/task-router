@@ -11,7 +11,9 @@ top-level source directory.
 | `docs/adr` | Architecture decision records, one per non-obvious design call (judge tier, replay semantics, provider auth). |
 | `knowledge` | OKF knowledge bundle — the domain concepts (tiers, classifier, judge, replay) as markdown, reachable from `knowledge/index.md`. |
 | `knowledge/domain` | Concept files for the router's core domain vocabulary: tiers, classifier, judge, replay. |
+| `scripts` | One-off manual smoke tests that aren't part of the pytest suite or CI (e.g. `smoke_claude.py`, the S0 Windows-stdin + think:false check) — run by hand, never automatically. |
+| `src/task_router` | The installable `task_router` package — application code, starting with the pinned local-tier (Ollama) request body in `local_request.py`. |
 | `tests` | Python test suite, run with `uv run pytest`. |
 | `.github/workflows` | CI: the pytest gate (`ci.yml`) and the OKF knowledge-bundle validator (`okf.yml`). |
 
-6 top-level directories.
+8 top-level directories.
