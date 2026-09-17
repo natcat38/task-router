@@ -1,7 +1,8 @@
 """Data-integrity check for data/prompts.json (Tech_Scope.md §2 / §5 S2 row).
 
-200 drafted rows, every tier null until the operator hand-labels them
-(Phase A gate, Product_Scope §6), exactly 20 traps, and all 9 use cases
+200 drafted rows. The operator hand-labels tiers over time (Phase A gate,
+Product_Scope §6), so `tier` may be null (not yet labelled) or one of the
+three valid tier values -- exactly 20 traps, and all 9 use cases
 represented. Cheap assertions -- this is not a test of prompt quality.
 """
 
@@ -15,6 +16,7 @@ EXPECTED_USE_CASES = {
     "extract", "reformat", "qa_context", "summarise", "classify",
     "analyse", "reason", "create", "judge",
 }
+VALID_TIER_VALUES = {None, "local", "sonnet", "opus"}
 
 
 def _load() -> list[dict]:
@@ -28,10 +30,13 @@ def test_exactly_200_rows():
     assert len(rows) == 200
 
 
-def test_all_rows_have_null_tier():
+def test_rows_have_valid_tier_values():
     rows = _load()
 
-    assert all(r["tier"] is None for r in rows)
+    assert len(rows) == 200
+    assert sum(1 for r in rows if r["trap"] is True) == 20
+    assert {r["use_case"] for r in rows} == EXPECTED_USE_CASES
+    assert all(r["tier"] in VALID_TIER_VALUES for r in rows)
 
 
 def test_exactly_20_traps():
