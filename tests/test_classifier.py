@@ -14,17 +14,20 @@ def test_no_model_file_falls_back_to_heuristic(tmp_path, monkeypatch):
 
 
 def test_heuristic_routes_short_plain_prompt_to_local():
+    # Calls the heuristic fallback directly so the result does not depend on
+    # whether a trained model file happens to exist on disk.
     features = extract_features("List three fruits.")
-    assert classifier.select_tier(features) == "local"
+    assert classifier.heuristic_select_tier(features) == "local"
 
 
 def test_heuristic_routes_reasoning_heavy_prompt_higher():
+    # Calls the heuristic fallback directly -- see note above.
     features = extract_features(
         "Explain step by step why this happens, because the reasoning "
         "matters, and therefore justify each conclusion given the context, "
         "since the outcome depends on it."
     )
-    tier = classifier.select_tier(features)
+    tier = classifier.heuristic_select_tier(features)
     assert tier in ("sonnet", "opus")
 
 
