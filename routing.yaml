@@ -1,0 +1,28 @@
+# Routing config for task-router (Tech_Scope.md §2 shape).
+#
+# Editable live via PUT /v1/routing-config (Tech_Scope.md §4) -- no restart
+# needed. judge_sample_rate is 1.0 for the S7 battery; dial it down after.
+tier_map:
+  local: qwen3:1.7b
+  sonnet: sonnet
+  opus: opus
+judge_sample_rate: 1.0
+use_cases:
+  extract:
+    judge_threshold: 4
+  reformat:
+    judge_threshold: 4
+  qa_context:
+    judge_threshold: 4
+  summarise:
+    judge_threshold: 4
+  classify:
+    judge_threshold: 5
+  analyse:
+    judge_threshold: 4
+  reason:
+    judge_threshold: 4
+  create:
+    judge_threshold: 3
+  judge:
+    judge_threshold: 4
