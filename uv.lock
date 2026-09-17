@@ -175,7 +175,7 @@ wheels = [
 [[package]]
 name = "task-router"
 version = "0.0.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "joblib" },
     { name = "pyyaml" },

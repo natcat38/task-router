@@ -21,17 +21,9 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
-# pytest gets "src" on sys.path from pyproject.toml's [tool.pytest.ini_options]
-# pythonpath setting; a plain `uv run python train.py` does not, since the
-# package isn't installed (no [build-system] here -- same gap baseline.py
-# has). Fixed locally here because this script must run standalone and
-# print the "no labelled rows" message rather than crash on import.
-if str(REPO_ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import joblib
 import numpy as np
