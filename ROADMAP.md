@@ -1,7 +1,7 @@
 # Roadmap — task-router
 
 **Current stage: Build**
-**Next up:** Day-1 hygiene (public repo, .gitignore/MIT/CI, OKF bundle, /protect-repo), then slice S0 as branch → PR → CI → merge. Plan signed off 2026-09-18.
+**Next up:** slice S1 (Providers + baseline) as branch → PR → CI → merge. Plan signed off 2026-09-18. Held for the 5-hour usage reset before S1.
 
 Lifecycle: Define → Plan → Build → Verify → Review → Ship.
 Agents: read this file at session start, state the current stage and next unchecked item before any other work, and update this file (checkboxes + Current stage + Next up) before ending. Product and design decisions belong to the user — elicit them with questions, never decide for them.
@@ -25,8 +25,13 @@ Exit: numbered vertical slices exist and the user approves. ⏳ Awaiting Build s
 
 ## 3 · Build — the only stage where feature code happens
 
-- [ ] Day-1 hygiene, before feature work: sensible `.gitignore` · README stub with the purpose paragraph · OKF knowledge bundle + validator (local + CI) · CI running the test command (even if 0 tests yet) · /protect-repo once pushed public · Docker/compose for backing services · config via env vars from the start.
+- [x] Day-1 hygiene, before feature work: `.gitignore` · README stub · OKF knowledge bundle + validator (local + CI) · CI (`uv run pytest`) green on first push · /protect-repo (ruleset active) · config via env vars from the start. Docker/compose: **N/A** — Ollama runs natively on the GPU, SQLite is embedded stdlib.
 - [ ] Vertical slices from the Tech Scope, in order. Every slice: implement → test → commit with a message that names the slice. No slice starts while the previous one is red.
+  - [x] **S0** environment bring-up + `claude -p`/Ollama smoke + `think:false` request-body pin — PR #1 merged (`eb3ba50`)
+  - [ ] **S1** Providers + baseline (registry.yaml, providers.py, fake provider, baseline.py)
+  - [ ] **S2** Prompts + classifier (prompts.json 200 drafted → STOP for labelling; features.py; train.py)
+  - [ ] **S3** Synchronous API + OTel tracing (Phase A exit)
+  - [ ] S4–S8 — Phase B (after the reset)
 
 Exit: all slices to the cut line done, CI green. Skills: tdd, ponytail.
 
