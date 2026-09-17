@@ -1,7 +1,7 @@
 # Roadmap — task-router
 
-**Current stage: Build (Phase A complete; Phase B after the weekly reset)**
-**Next up:** operator labels `data/prompts.json` (≥60); then Phase B S4–S8 after the weekly reset (Sat 19 Sep 04:59 SGT). Do not start S4 before the reset.
+**Current stage: Build — Phase B in progress**
+**Next up:** S5 (read API: GET /runs, /runs/{id}/spans, POST /replay). Operator directive 2026-09-18: complete S4–S8 before the weekly reset; pace around the 5-hour window so no subagent caps mid-slice. Battery (S7) still awaits explicit "go".
 
 Lifecycle: Define → Plan → Build → Verify → Review → Ship.
 Agents: read this file at session start, state the current stage and next unchecked item before any other work, and update this file (checkboxes + Current stage + Next up) before ending. Product and design decisions belong to the user — elicit them with questions, never decide for them.
@@ -32,12 +32,12 @@ Exit: numbered vertical slices exist and the user approves. ⏳ Awaiting Build s
   - [x] **S2** Prompts + classifier (prompts.json 200 drafted, `tier:null` → STOP for labelling; features.py; train.py) — PR #3 (`e0173db`)
   - [x] *(chore)* src-layout packaging so scripts import standalone — PR #4 (`ff1186e`)
   - [x] **S3** Synchronous API (`/v1/completions`, models, stats, routing-config) + OTel SQLite tracing — PR #5 (`5e06caf`) — **Phase A exit ✅**
-  - [ ] **S4** Background judge (tier above, sampled) + escalation — Phase B
+  - [x] **S4** Background judge (tier above, sampled) + one-step escalation — PR #6 (`aa927e8`). Operator labels (60) committed; classifier v1 trained: held-out 0.80, CV 0.70±0.03 (⚠ only 2 opus labels — opus effectively unlearnable, 5-fold degraded to 2-fold; more opus/sonnet labels would help, non-blocking).
   - [ ] **S5** Read API (`GET /runs`, `/runs/{id}/spans`, `POST /replay`) — Phase B
   - [ ] **S6** React UI (list → waterfall → replay-diff → stats) — Phase B
   - [ ] **S7** Battery over labelled rows (once, after "go") + feedback + `train.py --version 2` — Phase B
   - [ ] **S8** README (honest numbers) + ADRs recap + Jaeger screenshot + committed demo fixture — Phase B
-- Phase A gate still open on the operator's side: **label `data/prompts.json` (≥60 rows)**. Build side of Phase A (S0–S3) is green.
+- [x] Phase A gate: **label `data/prompts.json`** — 60/200 rows labelled (local: 38, sonnet: 20, opus: 2). Build side of Phase A (S0–S3) is green. Phase A fully closed.
 
 Exit: all slices to the cut line done, CI green. Skills: tdd, ponytail.
 
