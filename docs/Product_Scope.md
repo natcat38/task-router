@@ -50,7 +50,7 @@ These are non-negotiable and must appear in the README, not just be true in the 
 
 ## 5. Out of scope
 
-- **Fronting her own coding-agent subscription through this router.** Considered and dropped — subscription auth for a coding agent cannot be pointed at a custom gateway without forwarding session credentials, which is not something this project will do. Nothing here is sized for it.
+- **Fronting the operator's own coding-agent subscription through this router.** Considered and dropped — subscription auth for a coding agent cannot be pointed at a custom gateway without forwarding session credentials, which is not something this project will do. Nothing here is sized for it.
 - **A feature that lets the classifier see semantic meaning (e.g. an embedding-based feature).** Traps are caught by the judge instead (§4); this keeps the classifier cheap and simple, which is the point of having a first-pass classifier at all.
 - **Hosted or public deployment.** This runs locally, for one user, against one person's own subscription and own machine. Making it available to other people over the internet is a different project with different auth (an API key, not subscription auth) and isn't part of this scope.
 - **A Streamlit dashboard.** The audit log and replay-and-diff are surfaced through a web dashboard instead; which toolkit builds that dashboard is a technology decision that belongs in `Tech_Scope.md`, not here.
