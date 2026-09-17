@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS runs (
     total_duration_ms INTEGER,
     cost_all_tiers TEXT,
     forced_tier TEXT,
-    judge_cost REAL NOT NULL DEFAULT 0
+    judge_cost REAL NOT NULL DEFAULT 0,
+    use_case TEXT
 )
 """
 
@@ -104,4 +105,9 @@ def init_db(conn: sqlite3.Connection) -> None:
     conn.execute(SPANS_SCHEMA)
     conn.execute(REPLAYS_SCHEMA)
     _ensure_column(conn, "runs", "judge_cost", "REAL NOT NULL DEFAULT 0")
+    # S5: GET /runs needs a use_case filter (Tech_Scope §4), but no prior
+    # slice persisted use_case on the runs row -- it was only ever a
+    # request-time value passed to the judge job. Added here, nullable, so
+    # pre-S5 DB files migrate cleanly (existing rows read back use_case=None).
+    _ensure_column(conn, "runs", "use_case", "TEXT")
     conn.commit()
