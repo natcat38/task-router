@@ -1,7 +1,7 @@
 # Roadmap — task-router
 
-**Current stage: Build — Phase B in progress**
-**Next up:** S8 (README + ADR recap + Jaeger screenshot + committed demo fixture). Operator HELD the live battery (2026-09-18): S7 code is merged but not run; README will state routing/saving numbers are pending until the operator says "go". Complete S8 before the weekly reset; pace around the 5-hour window.
+**Current stage: Build complete (sprint S0–S8 shipped) — awaiting operator "go" for the live battery**
+**Next up:** (operator's call) run the live battery (`uv run python battery.py` → `train.py --version 2`) to fill in routing/saving numbers + train v2, then capture the Jaeger screenshot; then the Verify → Review → Ship stages. Nothing is blocked on the executor.
 
 Lifecycle: Define → Plan → Build → Verify → Review → Ship.
 Agents: read this file at session start, state the current stage and next unchecked item before any other work, and update this file (checkboxes + Current stage + Next up) before ending. Product and design decisions belong to the user — elicit them with questions, never decide for them.
@@ -36,7 +36,7 @@ Exit: numbered vertical slices exist and the user approves. ⏳ Awaiting Build s
   - [x] **S5** Read API (`GET /runs`, `/runs/{id}/spans`, `POST /replay` forced-tier diff) — PR #7 (`95dd11d`)
   - [x] **S6** React UI (list → waterfall → replay-diff → stats) — PR #8 (`1b385aa`); built in 3 chunks (scaffold/pages/waterfall); `ui` CI now a required check (Node 22)
   - [x] **S7 (code only)** `battery.py` (resumable, retry/backoff, labelled-rows-only, `--dry-run`) + `feedback.py` (weight-3 escalation feedback) + `train.py --version 2` (same held-out ids as v1, no improvement claim) — tests green, NOT run against real models. ⏳ The live paid battery run itself still awaits explicit operator "go" before executing.
-  - [ ] **S8** README (honest numbers) + ADRs recap + Jaeger screenshot + committed demo fixture — Phase B
+  - [x] **S8** honest README + ADR links + committed demo fixture (`data/fixtures/demo.sqlite`) + Jaeger instructions — PR #10 (`0af377c`). ⏳ Jaeger *screenshot* + live battery numbers pending the operator's "go".
 - [x] Phase A gate: **label `data/prompts.json`** — 60/200 rows labelled (local: 38, sonnet: 20, opus: 2). Build side of Phase A (S0–S3) is green. Phase A fully closed.
 
 Exit: all slices to the cut line done, CI green. Skills: tdd, ponytail.
