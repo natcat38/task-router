@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens from docs/Design_Direction.md. Keep this file the single
+ * source of truth for the palette / type roles — components should read
+ * these variables (via the Tailwind @theme mapping below), never hardcode
+ * hex values.
+ */
+:root {
+  --ink: #0f1417;
+  --panel: #161d22;
+  --line: #2a343b;
+  --fog: #8a97a0;
+  --signal: #e8edef;
+
+  --tier-local: #46c2b0;
+  --tier-sonnet: #e8a33d;
+  --tier-opus: #d65d8c;
+
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+
+  color-scheme: dark;
+}
+
+@theme {
+  --color-ink: var(--ink);
+  --color-panel: var(--panel);
+  --color-line: var(--line);
+  --color-fog: var(--fog);
+  --color-signal: var(--signal);
+  --color-tier-local: var(--tier-local);
+  --color-tier-sonnet: var(--tier-sonnet);
+  --color-tier-opus: var(--tier-opus);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--signal);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Quality floor: a visible focus ring on every interactive element,
+   never suppressed without a replacement (Design_Direction.md "Quality floor"). */
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* Quality floor: reduced motion is the default; motion is opt-in only
+   when the visitor hasn't asked for less of it. */
+@media (prefers-reduced-motion: no-preference) {
+  .transition-standard {
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      transform 150ms ease;
+  }
+}

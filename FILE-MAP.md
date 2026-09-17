@@ -15,6 +15,10 @@ top-level source directory.
 | `scripts` | One-off manual smoke tests that aren't part of the pytest suite or CI (e.g. `smoke_claude.py`, the S0 Windows-stdin + think:false check) — run by hand, never automatically. |
 | `src/task_router` | The installable `task_router` package — application code, starting with the pinned local-tier (Ollama) request body in `local_request.py`. |
 | `tests` | Python test suite, run with `uv run pytest`. |
-| `.github/workflows` | CI: the pytest gate (`ci.yml`) and the OKF knowledge-bundle validator (`okf.yml`). |
+| `.github/workflows` | CI: the pytest + UI gate (`ci.yml`) and the OKF knowledge-bundle validator (`okf.yml`). |
+| `ui` | The React dashboard (Vite + TS + Tailwind) that reads the router's API: runs list, waterfall, replay-diff, stats (Tech_Scope §1, §4). Its own `package.json` — never touches the Python project. |
+| `ui/src/api` | Typed client for the read API (`client.ts`, `types.ts` matching Tech_Scope §4 exactly) and the tier-color system (`tiers.ts`) shared by every page. |
+| `ui/src/components` | The app shell (nav rail + tier legend, `AppShell.tsx`), the tier chip, and the shared loading/empty/error state components. |
+| `ui/src/pages` | The four dashboard routes: runs list, run waterfall, replay-diff, stats. |
 
-9 top-level directories.
+10 top-level directories.
