@@ -1,0 +1,1602 @@
+[
+  {
+    "id": "p001",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Extract every email address mentioned in this text:\n\nHi team, please loop in sarah.chen@acme.io and the vendor contact at support@vendorco.net before Friday. Cc me at jordan.lee@acme.io too.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p002",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Pull out all the dates referenced below and list them in ISO format:\n\nThe contract was signed on March 3rd 2024, renews every 12 months, and the first review is scheduled for June 14, 2024.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p003",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "From the log line below, extract the request ID, status code, and response time in ms:\n\n[2026-02-11 09:14:02] req_id=8841af status=500 latency=1342ms path=/api/v1/orders",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p004",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Given this customer review, extract the product name and the star rating:\n\n\"I bought the Aero Standing Desk last month and honestly it wobbles a bit at max height. 3 out of 5 stars.\"",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p005",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Pull the invoice number, total amount, and due date out of this text:\n\nInvoice #INV-20394 for $1,240.00 is due on 2026-04-01. Please remit payment to the account on file.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p006",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Extract all phone numbers from this block of text, ignoring anything that isn't a valid format:\n\nCall the front desk at (555) 213-4409 or reach Priya directly on +1-555-998-2214. Fax is 555.213.4410.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p007",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "From this shipping confirmation, extract the tracking number and carrier name:\n\nYour package has shipped via FedEx. Tracking number: 794512309876. Estimated delivery: Thursday.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p008",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Extract the speaker names and their lines from this transcript snippet:\n\nALEX: We should ship the fix today.\nJORDAN: Agreed, but let's write a test first.\nALEX: Fair, I'll do that now.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p009",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Pull out the version number and release date from this changelog entry:\n\n## v2.3.1 - 2026-01-18\nFixed a memory leak in the export worker.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p010",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Extract the job title, company, and years of experience required from this listing:\n\nSenior Backend Engineer at Meridian Labs. 5+ years experience with distributed systems required.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p011",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "From the text below, extract every hashtag used:\n\nJust shipped the new dashboard! #buildinpublic #indiehacker #sideproject feedback welcome.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p012",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Extract the flight number, departure time, and gate from this itinerary:\n\nFlight SQ317 departs 14:35 from Gate B12, arriving Changi Terminal 3.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p013",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Pull the error type and file path out of this stack trace:\n\nTypeError: Cannot read properties of undefined (reading 'map') at src/components/OrderList.tsx:42",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p014",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Extract the discount code and expiry date from this promotional email text:\n\nUse code SPRING20 for 20% off, valid until April 30th, 2026.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p015",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "From this meeting note, extract the names of everyone assigned an action item:\n\nAction items: Dana to update the API docs, Marcus to fix the flaky test, Priya to review the PR.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p016",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Extract the temperature values (in Celsius) mentioned in this weather report snippet:\n\nToday's high is expected to reach 28C with an overnight low near 19C.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p017",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Pull out the SKU and quantity from this order line:\n\nOrder line: SKU-88213 x4 units, warehouse B, priority shipping.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p018",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Extract the URL and the anchor text from this markdown link:\n\nCheck out [our latest release notes](https://example.com/releases/v3) for details.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p019",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "From this bug report, extract the browser and OS the user was running:\n\nSteps to reproduce: happens consistently on Chrome 121 running on Windows 11, hasn't been tested elsewhere.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p020",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Extract the currency amounts mentioned in this paragraph, along with their currency codes:\n\nThe deal was worth $2.4M USD upfront plus an additional 500,000 EUR in deferred payments.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p021",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Pull the username and timestamp out of this chat log line:\n\n[2026-03-02 08:41:11] <devguy99> anyone else seeing 502s on staging?",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p022",
+    "tier": null,
+    "use_case": "extract",
+    "prompt": "Extract the ingredient list from this recipe snippet, one item per line:\n\nYou'll need 2 cups flour, 1 tsp baking soda, a pinch of salt, and 3 ripe bananas, mashed.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p023",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Convert this CSV row into a JSON object with matching keys:\n\nname,age,city\nMaria,29,Lisbon",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p024",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Reformat this list into a numbered list instead of bullet points:\n\n- Buy milk\n- Call the dentist\n- Finish the report",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p025",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Turn this JSON object into a Markdown table:\n\n{\"name\": \"Widget\", \"price\": 9.99, \"in_stock\": true}",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p026",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Rewrite these variable names from camelCase to snake_case, keeping the same order:\n\nuserName, orderTotal, isActive, createdAt",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p027",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Convert this paragraph into a bulleted list of its key points:\n\nThe new release adds dark mode, fixes the export bug, and improves startup time by 40 percent.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p028",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Reformat this date from US format to ISO 8601:\n\n03/14/2026",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p029",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Turn this plain address into a properly formatted multi-line mailing address:\n\n123 Main St Apt 4B Springfield IL 62704",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p030",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Convert this YAML snippet into equivalent JSON:\n\nname: task-router\nversion: 1\ntags:\n  - python\n  - fastapi",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p031",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Reformat this phone number into the international E.164 format, assuming it's a US number:\n\n(415) 555-0192",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p032",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Turn this run-on sentence into two shorter sentences without losing any information:\n\nThe server crashed at 3am because of a memory leak and nobody noticed until customers started complaining around 9am.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p033",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Convert this tab-separated data into a comma-separated CSV:\n\nname\tscore\nAli\t92\nBea\t87",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p034",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Reformat this code snippet's indentation from tabs to 4 spaces:\n\ndef greet():\n\tprint(\"hi\")",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p035",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Rewrite this list of names from \"Last, First\" order to \"First Last\" order:\n\nSmith, Jane\nOwusu, Kwame\nTanaka, Yuki",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p036",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Convert this markdown checklist into plain sentences describing what's done and what isn't:\n\n- [x] Set up database\n- [ ] Write tests\n- [x] Deploy staging",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p037",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Turn this dollar amount written in words into a numeral:\n\ntwo thousand four hundred and fifty dollars",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p038",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Reformat this XML fragment into equivalent JSON:\n\n<user><name>Sam</name><active>true</active></user>",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p039",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Convert this table of hours worked into a single sentence summary per person:\n\nName,Hours\nLee,38\nPat,41",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p040",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Rewrite this bullet list of ingredients into a single flowing sentence:\n\n- 2 eggs\n- 1 cup sugar\n- 1/2 cup butter",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p041",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Reformat these log timestamps from Unix epoch to human-readable UTC:\n\n1700000000\n1700003600",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p042",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Turn this comma-separated tag string into a JSON array of strings:\n\npython, backend, fastapi, sqlite",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p043",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Convert this Fahrenheit temperature list into Celsius, rounded to one decimal:\n\n98.6, 32, 212",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p044",
+    "tier": null,
+    "use_case": "reformat",
+    "prompt": "Reformat this slug into a human-readable title:\n\nhow-to-set-up-a-local-dev-environment",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p045",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Based on the changelog below, did version 2.3.0 fix the login bug?\n\nv2.3.0 - Added dark mode. Fixed export timeout. Improved caching.\nv2.3.1 - Fixed login redirect loop.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p046",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Using the email thread below, what time was the meeting rescheduled to?\n\nFrom: Dana\nSubject: Re: Standup time\nLet's move standup to 9:30am starting Monday instead of 9am.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p047",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "According to this product spec, what's the maximum file size the uploader supports?\n\nThe uploader accepts images and PDFs up to 10MB per file, with a max of 5 files per upload.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p048",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Given the contract clause below, when does the notice period start?\n\nEither party may terminate this agreement with 30 days written notice, effective from the date of receipt.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p049",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "From this API documentation excerpt, what status code is returned when the resource isn't found?\n\nGET /users/{id} returns 200 with the user object, or 404 if no user matches the given id.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p050",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Using the support ticket below, has the customer already tried restarting their router?\n\nTicket: My internet keeps dropping every hour. I've already restarted the router twice and reset the modem once, no change.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p051",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Based on this recipe, how long should the dough rest before baking?\n\nMix the ingredients, knead for 8 minutes, then let the dough rest for 45 minutes before shaping and baking at 220C.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p052",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "From the meeting notes below, who owns the database migration task?\n\nNotes: Discussed Q2 roadmap. Migration to Postgres assigned to Priya, due end of sprint. UI work stays with Alex.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p053",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "According to this weather advisory, is it safe to hike above 2000m tomorrow?\n\nAdvisory: Strong winds expected above 1800m through tomorrow evening, with visibility below 50m in places. Hiking above that elevation is not recommended.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p054",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Using the return policy text below, can a customer return an item after 45 days?\n\nItems may be returned within 30 days of delivery for a full refund, or within 60 days for store credit only.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p055",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "From this git commit message, what issue number does this commit close?\n\nfix: correct off-by-one error in pagination\n\nCloses #482",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p056",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Based on the lease agreement excerpt, who is responsible for lawn maintenance?\n\nTenant is responsible for interior upkeep. Landlord retains responsibility for exterior maintenance including lawn care and gutters.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p057",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Given this flight status update, is the connecting flight still reachable?\n\nFlight AA204 delayed by 40 minutes, now landing at 15:20. Connecting flight AA88 boards at 15:35 from an adjacent gate.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p058",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "From the PR description below, which files were touched by this change?\n\nThis PR updates src/auth/login.py and tests/test_login.py to fix the session timeout bug.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p059",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Using the FAQ entry below, does the plan include unlimited storage?\n\nThe Pro plan includes 500GB of storage. Unlimited storage is only available on the Enterprise plan.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p060",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Based on this incident report, what was the root cause of the outage?\n\nIncident summary: A misconfigured load balancer health check marked all healthy nodes as down, causing a full outage for 12 minutes.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p061",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "From the syllabus excerpt below, when is the final exam?\n\nCourse schedule: midterm in week 7, final project due week 14, final exam during finals week (check registrar for exact date).",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p062",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Given the warranty text, is water damage covered?\n\nThis warranty covers manufacturing defects for 2 years. It does not cover accidental damage, water damage, or normal wear and tear.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p063",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Using the changelog snippet, was there a breaking change in this release?\n\nv4.0.0 - BREAKING: renamed `config.json` to `settings.json`. Added new CLI flag --dry-run.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p064",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "From this doctor's note, when can the patient return to work?\n\nPatient may return to light duty work starting Monday, with full duties resuming after a follow-up appointment in two weeks.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p065",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Based on the pricing table below, how much would 3 seats on the Team plan cost per month?\n\nTeam plan: $12/seat/month, billed monthly. Annual billing saves 15%.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p066",
+    "tier": null,
+    "use_case": "qa_context",
+    "prompt": "Given this event listing, does the venue have wheelchair access?\n\nVenue notes: Main hall is wheelchair accessible via the side entrance on Elm Street; the upper gallery is stairs-only.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p067",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this meeting transcript in three bullet points:\n\nALEX: We're behind on the API migration, probably by a week.\nJORDAN: I can pull in extra hours this weekend if it unblocks QA.\nDANA: Let's not rush it, a slipped deadline is better than a broken migration. Let's push the release by 3 days instead.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p068",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this customer support thread in two sentences:\n\nCustomer: My order arrived damaged.\nAgent: I'm sorry to hear that! I've issued a replacement, it should arrive within 3-5 business days, and refunded your shipping cost.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p069",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise the key point of this product update email in one sentence:\n\nWe're excited to announce that starting next month, all Pro plan users will get access to the new analytics dashboard at no extra cost.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p070",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this PR description in a single line suitable for a changelog:\n\nThis PR refactors the payment retry logic to use exponential backoff instead of a fixed 3-second delay, reducing failed-charge retries by roughly 18% in staging tests.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p071",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this news snippet in one sentence for a headline:\n\nLocal transit authority announced today that the downtown light rail extension, delayed twice due to funding shortfalls, will now open in early 2027 after receiving a new state grant.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p072",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this code review comment thread into a short action list:\n\nReviewer: This function is doing too much, can you split it?\nAuthor: Sure, I'll extract the validation logic.\nReviewer: Also add a test for the empty-input case.\nAuthor: Will do.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p073",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this incident postmortem into two sentences a non-engineer could understand:\n\nThe outage was caused by a database connection pool exhaustion triggered by a runaway batch job that failed to release connections after each query.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p074",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this restaurant review in one sentence:\n\nThe food was excellent, especially the lamb, but service was painfully slow and we waited 20 minutes just to order drinks.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p075",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this research abstract in plain language, two sentences max:\n\nWe present a lightweight caching layer that reduces average query latency by 34% under high-concurrency workloads without requiring changes to existing schema.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p076",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this job candidate's cover letter in one sentence for a hiring manager skimming applications:\n\nI have spent five years building backend services in Go and Python, most recently leading a team of three through a migration from a monolith to microservices, and I'm looking for a senior role where I can keep owning architecture decisions.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p077",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this legal notice into plain English, no more than two sentences:\n\nPursuant to Section 4.2 of the Terms of Service, any dispute arising from use of the Service shall be resolved through binding arbitration rather than in court, except where prohibited by applicable law.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p078",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this sprint retro notes into three takeaways:\n\nWhat went well: deploys were smoother this sprint. What didn't: the design handoff was late twice. Action: add a design review checkpoint mid-sprint.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p079",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this five-star and one-star review pair into a balanced two-sentence overview:\n\nFive stars: \"Changed my sleep completely, worth every penny.\" One star: \"Stopped working after two weeks, customer service never responded.\"",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p080",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this GitHub issue thread into a one-line status update:\n\nUser: seeing 500 errors on checkout. Maintainer: confirmed, root cause is a null pointer in the discount calculator, fix in progress. Maintainer: fix merged, will ship in v1.4.2.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p081",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise the plot of this short story paragraph in one sentence:\n\nA lighthouse keeper on a remote island discovers a message in a bottle each year from the same unknown sender, until one year the letters stop, and she realizes she has to sail out to find out why.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p082",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this all-hands announcement into a single sentence for the internal newsletter:\n\nStarting next quarter, the company will move to a four-day work week on a trial basis for all full-time staff, with the trial reviewed after six months.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p083",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this stack trace and surrounding log context into one sentence describing what happened:\n\nWebhook handler raised KeyError: 'event_id' at src/webhooks/stripe.py:88, three consecutive retries all failed the same way before the queue moved the job to the dead-letter table.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p084",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this survey result paragraph in one sentence:\n\nOf 412 respondents, 68% said they would recommend the product to a colleague, while 22% cited pricing as their main hesitation.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p085",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this onboarding doc section into a two-item checklist:\n\nBefore your first day, please complete the background check form and choose your laptop preference from the IT portal.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p086",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this vendor contract renewal email in one sentence:\n\nOur current contract with DataSync Inc. expires June 30th; they've offered a 10% discount for a 2-year renewal, or a month-to-month option at standard rates.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p087",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this bug report into a one-line ticket title:\n\nWhen a user uploads a profile picture larger than 5MB on Safari specifically, the upload spinner never stops even though the file does eventually save.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p088",
+    "tier": null,
+    "use_case": "summarise",
+    "prompt": "Summarise this conference talk abstract in one sentence:\n\nThis talk walks through how a mid-size fintech company migrated 40 microservices off a monolith without a single hour of customer-facing downtime, focusing on the strangler-fig pattern and feature flagging.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p089",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this support ticket by priority (low, medium, high):\n\nOur entire team is locked out of the admin dashboard and we have a client demo in an hour.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p090",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this piece of feedback as a bug report or a feature request:\n\nIt would be great if I could export my data as a PDF, not just CSV.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p091",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify the sentiment of this review as positive, negative, or neutral:\n\nIt does the job. Nothing special, nothing broken.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p092",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this email as spam or not spam:\n\nCongratulations! You've been selected for a free cruise. Click here to claim your prize now!",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p093",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this git commit message by type (feat, fix, docs, chore, refactor):\n\nUpdate README with new setup instructions",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p094",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this customer message as urgent or not urgent:\n\nJust wanted to say the new update looks great, no rush on anything from my side.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p095",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this code comment as a TODO, a warning, or an explanation:\n\n// This is O(n^2) but n is always small here, fine for now",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p096",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this news headline by topic (technology, sports, politics, business):\n\nCentral bank raises interest rates for the third consecutive quarter",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p097",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this job posting by seniority level (junior, mid, senior):\n\nWe're looking for someone who can mentor junior engineers and own architecture decisions across the platform team.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p098",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this text message as a question, a statement, or a request:\n\ncan you grab milk on your way home",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p099",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this log entry by severity (info, warning, error, critical):\n\nDisk usage at 92% on volume /data, cleanup recommended",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p100",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this product description as B2B or B2C:\n\nEnterprise-grade SSO and audit logging built for IT teams managing thousands of seats.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p101",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this recipe by meal type (breakfast, lunch, dinner, dessert):\n\nFluffy pancakes stacked with maple syrup and fresh berries.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p102",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this support message by which team should handle it (billing, technical, sales):\n\nI was charged twice for my subscription this month, can someone look into a refund?",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p103",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Classify this tweet as promotional, informational, or personal:\n\nJust hit 10k followers, thank you all so much for the support over the years!",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p104",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "A square is always a rectangle. Is a rectangle always a square?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p105",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "All roses are flowers. Some flowers fade quickly. Do all roses fade quickly?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p106",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Every whale is a mammal. No mammal can breathe underwater. Can a whale breathe underwater?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p107",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Tomatoes are botanically fruits. Is ketchup a fruit product?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p108",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "If today is not Monday, tomorrow is not Tuesday. Today is Monday. Is tomorrow Tuesday?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p109",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "A bachelor is an unmarried man. Tom is married. Is Tom a bachelor?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p110",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "Every prime number greater than 2 is odd. Is 2 an even prime?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p111",
+    "tier": null,
+    "use_case": "classify",
+    "prompt": "All squares have four equal sides. This shape has four equal sides but is not a square. Is that possible?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p112",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this code snippet for potential bugs:\n\ndef divide(a, b):\n    return a / b",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p113",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this dataset summary and identify the most likely outlier:\n\nDaily signups: 42, 39, 45, 41, 312, 38, 44",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p114",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse the trade-offs between these two caching strategies described below:\n\nOption A: cache in-process, fast but not shared across servers. Option B: cache in Redis, shared but adds network latency.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p115",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this pricing change and its likely effect on churn:\n\nWe're raising the Pro plan from $15/mo to $22/mo, a 47% increase, with no new features added at launch.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p116",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this SQL query for performance issues:\n\nSELECT * FROM orders WHERE customer_id IN (SELECT id FROM customers WHERE country = 'SG')",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p117",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse the following A/B test results and state which variant performed better and why:\n\nVariant A: 4.2% conversion, 10,000 visitors. Variant B: 4.6% conversion, 1,200 visitors.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p118",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this error pattern across the past week's logs and suggest a likely cause:\n\n502 errors spike every day between 2-3pm, correlating with the scheduled backup job.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p119",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this contract clause for risk to the smaller party:\n\nEither party may terminate for convenience with 5 days notice, but only Party A may claim liquidated damages for early termination.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p120",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this function for edge cases it doesn't handle:\n\ndef get_first_word(sentence):\n    return sentence.split(' ')[0]",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p121",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this team's sprint velocity trend and flag any concerns:\n\nVelocity by sprint: 32, 30, 28, 24, 19",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p122",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse the pros and cons of switching from REST to GraphQL for this API, based on the description below:\n\nThe API currently has 40 endpoints, many requiring 2-3 chained calls from the mobile client to render one screen.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p123",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this resume bullet point and identify what's missing:\n\n\"Responsible for managing the customer database.\"",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p124",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this competitor comparison table and identify our biggest weakness:\n\nFeature,Us,CompetitorX\nPrice,$29,$19\nSupport,Email only,24/7 chat\nUptime SLA,99.9%,99.95%",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p125",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this git diff and describe what behavior it changes:\n\n- if user.is_active:\n+ if user.is_active and not user.is_suspended:",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p126",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this customer churn data and identify the strongest signal:\n\nChurned users: avg 2 logins/month, avg support tickets 3.1. Retained users: avg 14 logins/month, avg support tickets 0.4.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p127",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this deployment failure and identify the most likely single point of failure:\n\nDeploy log: build succeeded, tests passed, migration step timed out after 30s, rollback triggered.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p128",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this API response time breakdown and identify the biggest bottleneck:\n\nDNS: 12ms, TCP: 8ms, TLS: 45ms, Server processing: 620ms, Download: 15ms",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p129",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this feature request for scope creep against the original ask:\n\nOriginal ask: 'let users export their data as CSV.' Current PR also adds a scheduling system for recurring exports and email delivery.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p130",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this on-call rotation schedule for fairness issues:\n\nAlex: 6 weekend shifts this quarter. Priya: 1 weekend shift. Jordan: 5 weekend shifts.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p131",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this user onboarding funnel and identify where the biggest drop-off happens:\n\nSignup: 1000, Verified email: 850, Completed profile: 600, First action taken: 210",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p132",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this test coverage report and flag the riskiest gap:\n\npayments.py: 92% coverage. auth.py: 88% coverage. refunds.py: 14% coverage.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p133",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse this changelog for anything that looks like an undocumented breaking change:\n\nv3.2.0 - Performance improvements. Renamed internal `_config` field to `_settings`. Minor bug fixes.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p134",
+    "tier": null,
+    "use_case": "analyse",
+    "prompt": "Analyse the following two job offers and note the least obvious difference between them:\n\nOffer A: $120k base, no bonus, standard 401k match. Offer B: $105k base, 15% target bonus, 6% 401k match, but the bonus is discretionary.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p135",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Work out the answer: a train leaves at 2pm travelling at 60km/h, a second train leaves the same station at 2:30pm travelling at 90km/h in the same direction. What time does the second train catch up?",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p136",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Figure out the total cost: 3 items at $12.50 each with a 10% discount applied to the whole order, then 8% sales tax added after the discount.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p137",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Work through this scheduling conflict and propose the best fix: Meeting A is 2-3pm with Alex and Dana, Meeting B is 2:30-3:30pm with Alex and Priya, and Alex cannot be in two places at once.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p138",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Determine which of these two loan offers costs less in total interest: Loan A is $10,000 at 6% APR over 3 years. Loan B is $10,000 at 5% APR over 4 years.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p139",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Reason through this staffing problem: a shift needs at least 2 people, 5 staff are available, 2 have already requested the same day off. Can the shift still be covered, and how?",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p140",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Work out how many days it will take to finish the backlog if the team clears 8 tickets a day, adds 3 new tickets a day, and starts with 140 tickets open.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p141",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Figure out the break-even point: fixed costs are $4,000/month, each unit costs $8 to make and sells for $20.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p142",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Reason about which server to scale first given this data: Server A is at 95% CPU with low memory use. Server B is at 60% CPU but swapping heavily due to low memory.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p143",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Work out the seating arrangement: 6 people, 3 married couples, no couple can sit next to each other at a round table of 6.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p144",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Determine the fastest route: Route 1 is 40km at an average 80km/h. Route 2 is 32km but averages only 50km/h due to traffic.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p145",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Every cat in the room is asleep. Milo is awake and in the room. Is Milo a cat?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p146",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "All the lights in the building are off except one. The one light on is in the lobby. Is anyone in the lobby?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p147",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Nobody on the team has ever missed a deadline. Sam just missed a deadline. Is Sam on the team?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p148",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Every key on this ring opens the front door. This key doesn't open the front door. Is it on the ring?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p149",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "All the apples in the bowl are red. This apple is green. Is it in the bowl?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p150",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Each ticket in this batch is valid for one ride only. This ticket has been used twice. Was it in this batch?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p151",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Every employee badge grants access to the server room. Priya's badge does not grant access. Is Priya an employee?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p152",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "All the clocks in the office are five minutes fast. This clock reads the exact correct time. Is it one of the office clocks?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p153",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Every bottle on this shelf is unopened. This bottle is half empty. Is it on the shelf?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p154",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Each password on the list expired last week. This password still works today. Is it on the list?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p155",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "All the invoices in this folder are paid. This invoice is overdue. Is it in the folder?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p156",
+    "tier": null,
+    "use_case": "reason",
+    "prompt": "Every seat in the front row is reserved. This seat has no reservation. Is it in the front row?",
+    "trap": true,
+    "notes": ""
+  },
+  {
+    "id": "p157",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a two-sentence apology email to a customer whose order shipped five days late.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p158",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a Python function that takes a list of numbers and returns the running average at each index.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p159",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a short tagline for a habit-tracking app aimed at people who've tried and failed at habit trackers before.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p160",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write the opening paragraph of a blog post about why small teams ship faster than large ones.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p161",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a Slack message announcing that the staging environment will be down for maintenance tonight from 10pm to midnight.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p162",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a one-paragraph README section explaining how to install this project with uv.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p163",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a cover letter opening paragraph for a backend engineer applying to a fintech startup, mentioning 5 years of Go experience.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p164",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a haiku about debugging a production incident at 3am.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p165",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a SQL migration that adds a nullable `archived_at` timestamp column to the `orders` table.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p166",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write three subject line options for an email announcing a price increase, without sounding apologetic.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p167",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a short function docstring for a function that validates an email address against a basic regex.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p168",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a LinkedIn post announcing a new job, in a tone that's confident but not boastful.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p169",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a bash one-liner that finds all files larger than 100MB in the current directory.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p170",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a product changelog entry for a fix that resolved a memory leak in the export worker.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p171",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a short onboarding message for a new team member's first Slack DM from their manager.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p172",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a unit test for a function called `is_palindrome(s: str) -> bool`.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p173",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a two-line out-of-office auto-reply for someone travelling with limited email access.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p174",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a commit message for a change that fixes an off-by-one error in a pagination function.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p175",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a short FAQ answer explaining why the free plan doesn't include API access.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p176",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a brief incident update for customers, three sentences, about an ongoing partial outage.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p177",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a Dockerfile for a simple Python 3.12 FastAPI app that runs on port 8000.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p178",
+    "tier": null,
+    "use_case": "create",
+    "prompt": "Write a short thank-you note to a mentor who helped you land your first engineering job.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p179",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Which of these two error messages is clearer for an end user, and why?\n\nA: 'Error 4021: Operation failed.'\nB: 'We couldn't save your changes because the file is too large. Try a file under 10MB.'",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p180",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Compare these two function implementations and judge which is more maintainable:\n\nA: a 60-line function doing validation, transformation, and saving in one block.\nB: three 20-line functions, one for each step, called in sequence.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p181",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Score this customer support reply from 1-5 for professionalism and explain the score:\n\n'idk why ur mad, we already refunded you, read the email next time'",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p182",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Judge which of these two PR titles better follows conventional commit style:\n\nA: 'fixed stuff'\nB: 'fix: correct null check in checkout flow'",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p183",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Compare these two API designs and judge which is easier for a new developer to use correctly:\n\nA: POST /users/{id}/actions with a body specifying the action type.\nB: separate endpoints like POST /users/{id}/suspend, POST /users/{id}/activate.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p184",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Rate this piece of code for readability on a 1-5 scale and justify the score:\n\ndef f(x,y,z):\n  return x*y+z if z>0 else x*y-z",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p185",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Judge which of these two onboarding flows is more likely to convert a new user, and explain why:\n\nA: 8-step wizard collecting full profile info before first use.\nB: 1-step signup, profile completed gradually as the user explores.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p186",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Compare these two resignation letters and judge which leaves a better impression:\n\nA: a two-line email saying 'I quit, effective immediately.'\nB: a short note thanking the team, giving two weeks notice, and offering to help transition.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p187",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Judge whether this test actually verifies the behavior it claims to, and explain your reasoning:\n\ndef test_login_fails_with_wrong_password():\n    assert True",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p188",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Score these two variable names for clarity, `d` versus `days_since_last_login`, and explain the score.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p189",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Compare these two log messages and judge which is more useful for debugging at 3am:\n\nA: 'Error occurred.'\nB: 'Payment webhook failed: missing `event_id` field in payload from Stripe.'",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p190",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Judge which of these two meeting formats is more likely to run over time, and why:\n\nA: no agenda, open discussion.\nB: agenda with time-boxed items and a designated timekeeper.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p191",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Compare these two password policies and judge which better balances security and usability:\n\nA: minimum 8 characters, no other rules.\nB: minimum 12 characters, must include a number and symbol, must be changed every 30 days.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p192",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Rate this commit message against best practices and explain what's missing:\n\n'fixes'",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p193",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Judge which of these two support ticket responses better addresses the customer's actual problem:\n\nCustomer: 'Your app keeps crashing when I try to upload a photo.'\nA: 'Thanks for reaching out, we're always improving the app!'\nB: 'Sorry about that -- can you tell us your phone model and app version so we can reproduce the crash?'",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p194",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Compare these two database index choices for a table queried mostly by `user_id` and sometimes by `created_at`, and judge which is the better default:\n\nA: single index on `user_id`.\nB: composite index on `(user_id, created_at)`.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p195",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Judge which of these two error-handling approaches is safer for a payments system, and explain why:\n\nA: catch all exceptions and log them, then continue.\nB: catch specific expected exceptions, let unexpected ones propagate and halt the transaction.",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p196",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Score this job description for inclusivity issues and list what you'd change:\n\n'Looking for a young, energetic rockstar developer who can work long hours without complaint.'",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p197",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Compare these two changelog entries and judge which better serves users deciding whether to upgrade:\n\nA: 'Various fixes and improvements.'\nB: 'Fixed a bug where exports larger than 50MB would silently fail.'",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p198",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Judge which of these two pull request descriptions gives a reviewer enough context, and why:\n\nA: 'Updates.'\nB: 'Refactors the retry logic to use exponential backoff (was fixed 3s delay); fixes #482.'",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p199",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Rate this code comment for usefulness and explain your reasoning:\n\n// increment i\ni += 1",
+    "trap": false,
+    "notes": ""
+  },
+  {
+    "id": "p200",
+    "tier": null,
+    "use_case": "judge",
+    "prompt": "Compare these two naming choices for a boolean flag and judge which is clearer:\n\nA: `flag`\nB: `is_export_enabled`",
+    "trap": false,
+    "notes": ""
+  }
+]
