@@ -108,3 +108,20 @@ export function getStats(since?: string): Promise<StatsResponse> {
 export function getModels(): Promise<ModelsResponse> {
   return request<ModelsResponse>("/v1/models");
 }
+
+/**
+ * Turns a caught error into the copy a page should show in its `ErrorState`.
+ * A network-level failure (status 0) gets the exact wording from
+ * Design_Direction.md's error-state table; any other `ApiError` shows the
+ * router's own message; anything else falls back to a generic line. Shared
+ * so every read page reports errors the same way.
+ */
+export function describeApiError(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 0) {
+      return `Couldn't reach the router API at ${API_BASE}. Check it's running, then retry.`;
+    }
+    return err.message;
+  }
+  return "Something went wrong.";
+}
