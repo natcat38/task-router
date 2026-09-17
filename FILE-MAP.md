@@ -18,7 +18,7 @@ top-level source directory.
 | `.github/workflows` | CI: the pytest + UI gate (`ci.yml`) and the OKF knowledge-bundle validator (`okf.yml`). |
 | `ui` | The React dashboard (Vite + TS + Tailwind) that reads the router's API: runs list, waterfall, replay-diff, stats (Tech_Scope §1, §4). Its own `package.json` — never touches the Python project. |
 | `ui/src/api` | Typed client for the read API (`client.ts`, `types.ts` matching Tech_Scope §4 exactly) and the tier-color system (`tiers.ts`) shared by every page. |
-| `ui/src/components` | The app shell (nav rail + tier legend, `AppShell.tsx`), the tier chip, and the shared loading/empty/error state components. |
-| `ui/src/pages` | The four dashboard routes: runs list, run waterfall, replay-diff, stats. |
+| `ui/src/components` | The app shell (nav rail + tier legend, `AppShell.tsx`), the tier chip, the shared loading/empty/error state components, and `ReplayPanel.tsx` (the forced-tier replay-and-diff panel, embedded on the run waterfall page and reused by the standalone `/runs/:runId/replay` route). |
+| `ui/src/pages` | The four dashboard routes: runs list, run waterfall (`RunWaterfallPage.tsx`, span waterfall + attribute drawer), replay-diff, stats. |
 
 10 top-level directories.
