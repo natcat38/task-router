@@ -1,0 +1,23 @@
+# Model registry for task-router providers (Tech_Scope.md §2).
+#
+# Prices are API list prices, taken from claude.com/pricing research
+# (docs/research/claude-p-backend.md §5) -- calls actually made through
+# `claude -p` run on the Max subscription and never get billed at these
+# rates (Product_Scope §4 / §6 D10). Every cost figure computed from this
+# file must say so next to the number.
+models:
+  - provider: ollama
+    id: qwen3:1.7b
+    tier: local
+    price_in_per_m: 0.0
+    price_out_per_m: 0.0
+  - provider: claude_cli
+    id: sonnet
+    tier: sonnet
+    price_in_per_m: 2.0
+    price_out_per_m: 10.0
+  - provider: claude_cli
+    id: opus
+    tier: opus
+    price_in_per_m: 5.0
+    price_out_per_m: 25.0
