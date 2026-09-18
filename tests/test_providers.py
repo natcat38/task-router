@@ -94,6 +94,61 @@ def test_send_claude_cli_runner_garbage_json_becomes_error_field():
     assert result["error"] is not None
 
 
+def test_send_claude_cli_null_stdout_becomes_error_field():
+    """Windows bug: text=True decoded with the locale codec (cp1252) can hit
+    a byte it can't map (a UTF-8 em-dash/smart quote in claude -p's JSON
+    output), so subprocess's stdout reader raises UnicodeDecodeError and
+    completed.stdout comes back None. json.loads(None) raises TypeError,
+    which must not escape send() -- it must become an error field instead."""
+
+    class FakeCompletedProcess:
+        returncode = 0
+        stdout = None
+        stderr = ""
+
+    def none_stdout_runner(args, input, capture_output, text, timeout, env):
+        return FakeCompletedProcess()
+
+    result = send("hi", "sonnet", runner=none_stdout_runner)
+
+    assert result["error"] is not None
+    assert result["text"] == ""
+    assert result["input_tokens"] == 0
+    assert result["output_tokens"] == 0
+    assert result["cost"] == 0.0
+
+
+def test_default_runner_requests_utf8_decoding(monkeypatch):
+    """The real subprocess.run wrapper must decode claude -p's stdout as
+    UTF-8 with errors="replace", not the Windows locale codec (cp1252),
+    otherwise a UTF-8 byte cp1252 can't map crashes the decode entirely."""
+    import subprocess
+
+    from task_router.providers import _default_runner
+
+    captured = {}
+
+    def fake_run(args, **kwargs):
+        captured.update(kwargs)
+        captured["args"] = args
+
+        class FakeCompletedProcess:
+            returncode = 0
+            stdout = "{}"
+            stderr = ""
+
+        return FakeCompletedProcess()
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    _default_runner(
+        ["claude", "-p"], input="hi", capture_output=True, text=True, timeout=5, env={}
+    )
+
+    assert captured["encoding"] == "utf-8"
+    assert captured["errors"] == "replace"
+
+
 def test_send_claude_cli_non_numeric_usage_becomes_error_field():
     """A `claude -p` reply with the right shape but wrong field types (e.g.
     a string where a token count belongs) must not crash send()'s cost
