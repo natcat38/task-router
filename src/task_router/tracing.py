@@ -106,9 +106,15 @@ def setup_tracing(conn: sqlite3.Connection) -> Tuple[Tracer, TracerProvider]:
 
     otlp_endpoint = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT")
     if otlp_endpoint:
-        from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
-            OTLPSpanExporter,
-        )
+        try:
+            from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
+                OTLPSpanExporter,
+            )
+        except ImportError as exc:
+            raise ImportError(
+                "OTLP export requested via OTEL_EXPORTER_OTLP_ENDPOINT but the "
+                "exporter isn't installed -- run `uv sync --extra otlp`"
+            ) from exc
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
         provider.add_span_processor(
