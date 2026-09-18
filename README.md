@@ -41,8 +41,10 @@ Per-run span waterfall (`classify` → `select_tier` → `chat` → `judge` →
 `escalate`), with the replay-and-diff panel below it.
 
 ![Savings shown with and without judge cost included](docs/img/ui-stats.png)
-Stats page: savings shown two ways, with and without the judge call's own
-cost folded in.
+Stats page from the synthetic demo fixture (`data/fixtures/demo.sqlite`),
+not the real battery run below. It shows savings two ways, with and without
+the judge call's own cost folded in; see Results below for the real
+numbers.
 
 ## Architecture
 
@@ -190,27 +192,85 @@ just implementation details.
   exercised against a real endpoint. See
   [ADR 0003](docs/adr/0003-provider-auth-subscription-with-apikey-slot.md).
 
-## Battery status: pending
+## Results (measured)
 
-The routing/saving battery (`battery.py`, roughly 120 to 150 real
-`claude -p` calls against the 60 labelled prompts) has not been run. The
-operator held it before spending real subscription usage on it. S7 shipped
-the code (resumable checkpointing, retry/backoff, labelled-rows-only
-filtering) and tested it against a fake provider, but the live run is a
-separate, explicit step that hasn't happened yet. There are no
-routing/saving numbers from a real battery run anywhere in this README, the
-UI's stats page, or `data/fixtures/demo.sqlite` (that fixture is synthetic,
-not battery output, see above).
+The battery ran for real against all 60 labelled prompts, on the
+operator's own Max subscription (`claude -p`, never `--bare`). All 60
+requests completed; 0 failures.
 
-To produce real numbers, once authorized:
+Final tier, after any escalation: local 27, sonnet 26, opus 7. Seventeen
+requests escalated: 11 reached a confirmed-passing Sonnet answer, and 6
+escalated all the way to Opus.
+
+The judge scored 58 of the 60 answers (Opus answers are never judged,
+see Honesty above, which accounts for most of the 2 not scored). Scores:
+5.0 on 40 answers, 4.0 on 11, 3.0 on 6, 1.0 on 1.
+
+### Savings, at API list prices, no money changed hands
+
+Both figures use `registry.yaml`'s list prices; nothing here was actually
+billed (see Honesty above). Both are reported, side by side, per the
+project's own honesty rules (`docs/Product_Scope.md` §4,
+`docs/research/SPRINT-PLAN.md` §8):
+
+- Excluding judge cost: **-11.6%**. Answer calls cost $0.079, escalation
+  calls cost $0.247, for $0.327 total, against an all-Opus baseline of
+  $0.293.
+- Including judge cost: **-68.6%**. Adding $0.167 of judge calls brings the
+  total to $0.493, against the same $0.293 baseline.
+
+On this run, the router cost more than sending every request straight to
+Opus. That's the honest result, stated plainly, not spun.
+
+### Why it cost more, not less
+
+1. `judge_sample_rate` was set to 1.0 for this run (proof mode: every
+   request judged, not sampled). Each judge call sends the prompt and
+   answer to the tier above, so judge cost alone is about 57% of the whole
+   all-Opus baseline by itself. Production use would sample instead, for
+   example 0.1 to 0.2.
+2. The classifier is still weak (60 labels total, only 2 labelled opus),
+   so it under-routes: 17 escalations, 6 of them all the way to Opus. Each
+   of those pays for the cheap answer and the escalated answer.
+3. The all-Opus baseline is estimated from each request's routed-answer
+   token counts, not from a real Opus call made per request. That
+   under-counts what all-Opus would actually cost and biases the
+   comparison against the router.
+
+### What would change this
+
+More labelled examples, especially opus ones, would cut escalations by
+giving the classifier something to learn `opus` from. A judge sample rate
+below 1.0 would cut most of the loss directly, since judge cost is the
+biggest single factor above. Neither change has been made here on purpose:
+the point of this run is to show the tool correctly measuring a case where
+routing does not pay off, not to report a headline saving. This project's
+value is the honest measurement, the full instrumentation, and the
+routing-pipeline replay debugger, not this number.
+
+### Classifier: v1 vs v2, no improvement claim
+
+Same seeded held-out ids for both, about 15 items.
+
+| | Held-out accuracy | 2-fold CV |
+|---|---|---|
+| v1 | 0.80 | 0.70 ± 0.03 |
+| v2 (+11 weighted feedback rows) | 0.40 | 0.465 ± 0.008 |
+
+v2 did not improve on v1. The 11 sonnet-weighted feedback rows, added from
+this run's escalations, pushed the classifier toward sonnet, which hurt it
+on this small held-out set. That's expected, not a bug: feedback like this
+mainly helps on near-duplicate prompts, and can hurt accuracy on a
+held-out set this small (`docs/Product_Scope.md` §4;
+`docs/research/REFUTATIONS.md` #13/#14).
+
+### Reproduce
 
 ```
-uv run python battery.py
+uv run python battery.py --db-path data/battery.sqlite
+uv run python feedback.py --db-path data/battery.sqlite
 uv run python train.py --version 2
 ```
-
-`battery.py --dry-run` exercises the same code path against the fake
-provider if you want to see it run without spending anything.
 
 ## Jaeger (trace waterfall via an OTLP collector)
 
