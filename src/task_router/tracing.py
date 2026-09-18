@@ -92,6 +92,23 @@ class SQLiteSpanExporter(SpanExporter):
         return True
 
 
+def _normalize_otlp_endpoint(base: str) -> str:
+    """Turn a base OTLP HTTP endpoint (e.g. `http://localhost:4318`) into the
+    full traces URL the exporter needs (`http://localhost:4318/v1/traces`).
+
+    `OTLPSpanExporter(endpoint=...)` treats its `endpoint` argument as the
+    complete URL, not a base -- passing it the bare base URL from the README
+    (`http://localhost:4318`) silently fails against Jaeger's OTLP HTTP
+    receiver, which listens on `/v1/traces`. If the configured value already
+    ends with `/v1/traces`, it is left alone so a fully-qualified endpoint
+    still works.
+    """
+    base = base.rstrip("/")
+    if base.endswith("/v1/traces"):
+        return base
+    return base + "/v1/traces"
+
+
 def setup_tracing(conn: sqlite3.Connection) -> Tuple[Tracer, TracerProvider]:
     """Build a fresh TracerProvider wired to the SQLite exporter (+ optional
     OTLP dual-export), and return `(tracer, provider)`.
@@ -118,7 +135,9 @@ def setup_tracing(conn: sqlite3.Connection) -> Tuple[Tracer, TracerProvider]:
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
         provider.add_span_processor(
-            BatchSpanProcessor(OTLPSpanExporter(endpoint=otlp_endpoint))
+            BatchSpanProcessor(
+                OTLPSpanExporter(endpoint=_normalize_otlp_endpoint(otlp_endpoint))
+            )
         )
 
     return provider.get_tracer("router"), provider

@@ -9,6 +9,7 @@ top-level source directory.
 | --- | --- |
 | `docs` | Product and tech scope docs (`Product_Scope.md`, `Tech_Scope.md`) that are the source of truth for what this router does and how it is built. |
 | `docs/adr` | Architecture decision records, one per non-obvious design call (judge tier, replay semantics, provider auth). |
+| `docs/img` | Real screenshots embedded in `README.md`: the UI (runs list, run waterfall, stats) and a Jaeger trace waterfall. |
 | `data` | Classifier training data: `prompts.json` (200 drafted rows across the 9 use cases, `tier: null` until the operator hand-labels them). |
 | `data/fixtures` | Committed demo data (`demo.sqlite`) so the UI and API demo fully populated with no model running. Synthetic, not battery output — built by `scripts/make_demo_fixture.py`. |
 | `knowledge` | OKF knowledge bundle — the domain concepts (tiers, classifier, judge, replay) as markdown, reachable from `knowledge/index.md`. |

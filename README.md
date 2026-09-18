@@ -30,6 +30,20 @@ answers, scores, and escalation outcomes. See
 reasoning, including why span-only replay was rejected as duplicating
 tooling that already exists.
 
+## Screens
+
+![Runs list, tier-colored with an escalated badge](docs/img/ui-runs.png)
+Runs list, each row colored by tier, with an escalated badge where the
+judge kicked a request up.
+
+![Run waterfall with classify, select_tier, chat, judge, and escalate spans, plus the replay-and-diff panel](docs/img/ui-waterfall.png)
+Per-run span waterfall (`classify` → `select_tier` → `chat` → `judge` →
+`escalate`), with the replay-and-diff panel below it.
+
+![Savings shown with and without judge cost included](docs/img/ui-stats.png)
+Stats page: savings shown two ways, with and without the judge call's own
+cost folded in.
+
 ## Architecture
 
 ```
@@ -219,9 +233,10 @@ for a second view of the same trace:
    the trace: `router.classify` → `router.select_tier` → `chat <model>` →
    `router.judge` → `router.escalate` as a waterfall.
 
-**Screenshot pending:** a Jaeger trace-waterfall screenshot will be added at
-`docs/img/jaeger.png` once captured. It needs Docker and a running backend —
-a manual, one-time step rather than something automated in this repo.
+![Jaeger trace waterfall of a task-router request](docs/img/jaeger.png)
+A single request's trace in Jaeger, 9 spans: `router.classify` →
+`router.select_tier` → `chat <model>` → `router.judge` →
+`router.escalate`.
 
 ## Docs
 
