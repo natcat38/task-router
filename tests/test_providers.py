@@ -94,6 +94,29 @@ def test_send_claude_cli_runner_garbage_json_becomes_error_field():
     assert result["error"] is not None
 
 
+def test_send_claude_cli_non_numeric_usage_becomes_error_field():
+    """A `claude -p` reply with the right shape but wrong field types (e.g.
+    a string where a token count belongs) must not crash send()'s cost
+    arithmetic -- `send()` never raises, per Tech_Scope.md §1."""
+    import json as json_module
+
+    class FakeCompletedProcess:
+        returncode = 0
+        stdout = json_module.dumps(
+            {"result": "hi", "usage": {"input_tokens": "not-a-number", "output_tokens": 5}}
+        )
+        stderr = ""
+
+    def fake_runner(args, input, capture_output, text, timeout, env):
+        return FakeCompletedProcess()
+
+    result = send("hi", "sonnet", runner=fake_runner)
+
+    assert result["error"] is not None
+    assert result["text"] == ""
+    assert result["cost"] == 0.0
+
+
 # ---------------------------------------------------------------------------
 # Ollama success path
 # ---------------------------------------------------------------------------
