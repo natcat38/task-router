@@ -21,6 +21,13 @@ data/battery_progress.json
 data/battery_results*
 data/feedback.json
 
+# auto_label.py runtime artifacts (regenerated each run, never committed --
+# --merge is what turns data/auto_labels.json into tracked data/prompts.json
+# changes, done separately by the operator)
+data/auto_labels.json
+data/auto_label.sqlite
+data/auto_label_progress.json
+
 # S8 demo fixture is committed on purpose — negate the DB ignore above for it
 !data/fixtures/
 !data/fixtures/**
