@@ -181,6 +181,7 @@ def judge_and_escalate(
     current_output = output_text
     escalation_chain: list[dict] = []
     total_judge_cost = 0.0
+    total_escalation_cost = 0.0
     final_score: Optional[int] = None
     final_label: Optional[str] = None
     attempted = False
@@ -224,6 +225,15 @@ def judge_and_escalate(
             esc_span.set_attribute("router.escalate_to_tier", judge_tier)
             reanswer = send_fn(prompt, judge_model.id)
 
+        # The re-answer call's real cost -- honesty-fix (backend review
+        # Finding #1): this was previously dropped on the floor entirely,
+        # never added to any total and never persisted, so an escalated
+        # run's real spend was invisible to GET /v1/stats. Counted here
+        # even on a failed re-answer (cost defaults to 0.0 via providers'
+        # "never raises" _empty_error_result contract, so this is a no-op
+        # in that case, not a special case).
+        total_escalation_cost += reanswer.get("cost", 0.0) or 0.0
+
         if reanswer.get("error"):
             escalation_chain.append(
                 {
@@ -250,7 +260,7 @@ def judge_and_escalate(
     conn.execute(
         "UPDATE runs SET judge_score=?, judge_label=?, escalated=?, "
         "escalation_chain=?, tier_chosen=?, model_used=?, output_text=?, "
-        "judge_cost=? WHERE run_id=?",
+        "judge_cost=?, escalation_cost=? WHERE run_id=?",
         (
             final_score,
             final_label,
@@ -260,6 +270,7 @@ def judge_and_escalate(
             current_model_id,
             current_output,
             total_judge_cost,
+            total_escalation_cost,
             run_id,
         ),
     )

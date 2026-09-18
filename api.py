@@ -233,11 +233,18 @@ def create_app(
                 entry.id, result["input_tokens"], result["output_tokens"]
             )
 
+        # The real cost of the answer call actually made, at the tier just
+        # routed to, computed from that answer's own tokens -- honesty-fix
+        # (backend review Finding #1): persisted independently of
+        # cost_all_tiers so GET /v1/stats still has the true initial cost
+        # even after judge.py later overwrites tier_chosen on escalation.
+        answer_cost = cost_all_tiers.get(tier) or 0.0
+
         conn.execute(
             "INSERT INTO runs (run_id, created_at, input_text, input_features, "
             "use_case, tier_chosen, model_used, output_text, status, "
-            "total_duration_ms, cost_all_tiers, forced_tier) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+            "total_duration_ms, cost_all_tiers, forced_tier, answer_cost) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (
                 run_id,
                 datetime.now(timezone.utc).isoformat(),
@@ -251,6 +258,7 @@ def create_app(
                 None,
                 json.dumps(cost_all_tiers),
                 forced_tier,
+                answer_cost,
             ),
         )
         conn.commit()
@@ -343,7 +351,10 @@ def create_app(
                     content=_error("invalid_since", "since must be an ISO timestamp"),
                 )
 
-        query = "SELECT tier_chosen, cost_all_tiers, judge_cost FROM runs"
+        query = (
+            "SELECT tier_chosen, cost_all_tiers, judge_cost, answer_cost, "
+            "escalation_cost FROM runs"
+        )
         params: tuple = ()
         if since is not None:
             query += " WHERE created_at >= ?"
@@ -358,8 +369,15 @@ def create_app(
             tier = row["tier_chosen"]
             by_tier[tier] = by_tier.get(tier, 0) + 1
             costs = json.loads(row["cost_all_tiers"]) if row["cost_all_tiers"] else {}
-            if costs.get(tier) is not None:
-                actual_cost_excl_judge += costs[tier]
+            # Honesty-fix (backend review Finding #1): actual incurred cost
+            # is answer_cost + escalation_cost -- the real cost of the real
+            # calls that were made -- never cost_all_tiers[tier_chosen],
+            # which is a pre-escalation estimate keyed by the *post*-
+            # escalation tier once judge.py has overwritten tier_chosen.
+            # The all-Opus baseline below is still the cost_all_tiers
+            # estimate on purpose -- that side is hypothetical by design
+            # ("what if every run went to opus"), not an actual cost.
+            actual_cost_excl_judge += (row["answer_cost"] or 0.0) + (row["escalation_cost"] or 0.0)
             if costs.get("opus") is not None:
                 opus_cost += costs["opus"]
             judge_cost_total += row["judge_cost"] or 0.0

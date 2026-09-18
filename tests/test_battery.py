@@ -225,19 +225,34 @@ def test_is_usage_limit_error_matches_expected_markers(error, expected):
 # --- summary math -------------------------------------------------------------
 
 
-def _seed_run(conn, run_id, *, tier, cost_all_tiers, judge_cost=0.0, escalated=0):
+def _seed_run(
+    conn, run_id, *, tier, cost_all_tiers, judge_cost=0.0, escalated=0,
+    answer_cost=0.0, escalation_cost=0.0,
+):
     conn.execute(
         "INSERT INTO runs (run_id, created_at, input_text, tier_chosen, model_used, "
-        "output_text, status, cost_all_tiers, judge_cost, escalated) VALUES (?,?,?,?,?,?,?,?,?,?)",
+        "output_text, status, cost_all_tiers, judge_cost, escalated, answer_cost, "
+        "escalation_cost) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
         (
             run_id, "2026-01-01T00:00:00+00:00", "prompt", tier, "model", "answer",
-            "ok", json.dumps(cost_all_tiers), judge_cost, escalated,
+            "ok", json.dumps(cost_all_tiers), judge_cost, escalated, answer_cost,
+            escalation_cost,
         ),
     )
     conn.commit()
 
 
 def test_compute_summary_matches_hand_computed_savings(tmp_path, routing_yaml):
+    """Regression test for the honesty-contract bug (backend review Finding
+    #1): actual cost must come from answer_cost + escalation_cost, not
+    cost_all_tiers[tier_chosen]. r2 below is escalated -- its cost_all_tiers
+    still carries the old pre-escalation estimate (cost_all_tiers["sonnet"]
+    = 0.01, the value the pre-fix formula would have used), but its real
+    escalation call actually cost 0.004. Hand-computing against the old
+    buggy formula (0.001 + 0.01 = 0.011) would give a different -- wrong --
+    percentage than hand-computing against the real incurred cost
+    (0.0012 + 0.004 = 0.0052), so this test would fail if the bug came
+    back."""
     db_path = tmp_path / "audit.sqlite"
     app = create_app(
         db_path=db_path,
@@ -248,11 +263,17 @@ def test_compute_summary_matches_hand_computed_savings(tmp_path, routing_yaml):
     client = TestClient(app)
     conn = db_module.get_connection(db_path)
 
-    _seed_run(conn, "r1", tier="local", cost_all_tiers={"local": 0.001, "sonnet": 0.01, "opus": 0.05}, judge_cost=0.002)
     _seed_run(
-        conn, "r2", tier="sonnet",
+        conn, "r1", tier="local",
+        cost_all_tiers={"local": 0.001, "sonnet": 0.01, "opus": 0.05},
+        judge_cost=0.002, answer_cost=0.001, escalation_cost=0.0,
+    )
+    _seed_run(
+        conn, "r2", tier="sonnet",  # final tier after escalation
         cost_all_tiers={"local": 0.0012, "sonnet": 0.01, "opus": 0.06},
         judge_cost=0.003, escalated=1,
+        answer_cost=0.0012,  # real cost of the original local-tier answer
+        escalation_cost=0.004,  # real cost of the sonnet re-answer call
     )
 
     progress = {"completed": {"p1": {"escalated": False}, "p2": {"escalated": True}}}
@@ -260,7 +281,7 @@ def test_compute_summary_matches_hand_computed_savings(tmp_path, routing_yaml):
     summary = battery.compute_summary(client, progress)
 
     opus_total = 0.05 + 0.06
-    actual_excl = 0.001 + 0.01
+    actual_excl = (0.001 + 0.0) + (0.0012 + 0.004)  # answer_cost + escalation_cost per row
     actual_incl = actual_excl + 0.002 + 0.003
     expected_excl_pct = (1 - actual_excl / opus_total) * 100
     expected_incl_pct = (1 - actual_incl / opus_total) * 100
@@ -271,6 +292,13 @@ def test_compute_summary_matches_hand_computed_savings(tmp_path, routing_yaml):
     assert summary["saved_pct_excl_judge"] == pytest.approx(expected_excl_pct)
     assert summary["saved_pct_incl_judge"] == pytest.approx(expected_incl_pct)
     assert summary["price_basis"] == "api_list_prices_no_money_changed_hands"
+    # The old buggy formula (cost_all_tiers[tier_chosen]) would have used
+    # 0.01 for r2's cost instead of the real 0.0012 + 0.004 -- assert the
+    # two disagree, so a regression to the old formula is caught here even
+    # if the pytest.approx above were loosened.
+    buggy_actual_excl = 0.001 + 0.01
+    buggy_pct = (1 - buggy_actual_excl / opus_total) * 100
+    assert summary["saved_pct_excl_judge"] != pytest.approx(buggy_pct)
 
 
 def test_format_summary_includes_honesty_label_and_counts():

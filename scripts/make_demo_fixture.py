@@ -127,6 +127,8 @@ def build_fixture(conn: sqlite3.Connection) -> None:
         cost_all_tiers=json.dumps(COST_ALL_TIERS_TEMPLATE),
         forced_tier=None,
         judge_cost=0.00042,
+        answer_cost=COST_ALL_TIERS_TEMPLATE["local"],
+        escalation_cost=0.0,
     )
     _insert_span(
         conn,
@@ -205,6 +207,8 @@ def build_fixture(conn: sqlite3.Connection) -> None:
         cost_all_tiers=json.dumps(COST_ALL_TIERS_TEMPLATE),
         forced_tier=None,
         judge_cost=0.00135,
+        answer_cost=COST_ALL_TIERS_TEMPLATE["sonnet"],
+        escalation_cost=0.0,
     )
     _insert_span(
         conn,
@@ -282,6 +286,8 @@ def build_fixture(conn: sqlite3.Connection) -> None:
         cost_all_tiers=json.dumps(COST_ALL_TIERS_TEMPLATE),
         forced_tier=None,
         judge_cost=0.0,
+        answer_cost=COST_ALL_TIERS_TEMPLATE["opus"],
+        escalation_cost=0.0,
     )
     _insert_span(
         conn,
@@ -348,6 +354,15 @@ def build_fixture(conn: sqlite3.Connection) -> None:
         cost_all_tiers=json.dumps(COST_ALL_TIERS_TEMPLATE),
         forced_tier=None,
         judge_cost=0.00042 + 0.00135,  # judged at local (sonnet call), then judged again post-escalation (opus call)
+        # Honesty-fix (backend review Finding #1): answer_cost is the real
+        # cost of the ORIGINAL local-tier answer (before escalation
+        # overwrote tier_chosen to "sonnet"); escalation_cost is the real
+        # cost of the sonnet re-answer call that produced the winning
+        # output -- deliberately a different figure from
+        # cost_all_tiers["sonnet"] (0.00042) to make clear this is a real,
+        # separately-tracked cost, not the pre-escalation estimate.
+        answer_cost=COST_ALL_TIERS_TEMPLATE["local"],
+        escalation_cost=0.00038,
     )
     _insert_span(
         conn,
@@ -456,6 +471,8 @@ def build_fixture(conn: sqlite3.Connection) -> None:
         cost_all_tiers=json.dumps(COST_ALL_TIERS_TEMPLATE),
         forced_tier="opus",
         judge_cost=0.0,
+        answer_cost=COST_ALL_TIERS_TEMPLATE["opus"],
+        escalation_cost=0.0,
     )
     _insert_span(
         conn,
