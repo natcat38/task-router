@@ -97,6 +97,10 @@ npm install
 npm run dev
 ```
 
+The backend allows cross-origin requests from the Vite dev server
+(`http://localhost:5173` / `http://127.0.0.1:5173`) by default; set
+`CORS_ALLOW_ORIGINS` (comma-separated) to override that list.
+
 ### Environment variables
 
 | Variable | Default | Used by |
@@ -106,6 +110,7 @@ npm run dev
 | `REGISTRY_PATH` | `registry.yaml` | `registry.py`: the tier/model/price table. |
 | `ROUTING_CONFIG_PATH` | `routing.yaml` | `routing_config.py`: tier map, judge sample rate, per-use-case thresholds. |
 | `VITE_API_BASE` | `http://localhost:8000` | `ui/src/api/client.ts`: where the UI's read API calls go. |
+| `CORS_ALLOW_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | `api.py`: comma-separated origins allowed to call the backend from a browser. |
 
 ### Demo with no model running
 

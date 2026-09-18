@@ -141,3 +141,27 @@ def test_put_routing_config_bad_threshold_is_422(app_and_client):
         json={"use_cases": {"summarise": {"judge_threshold": 9}}},
     )
     assert resp.status_code == 422
+
+
+def test_cors_allows_the_default_vite_dev_origin(app_and_client):
+    # The React UI at http://localhost:5173 calls this API from the browser
+    # (not curl, not a mocked component test), so it needs the actual
+    # `access-control-allow-origin` response header or the browser blocks
+    # the response before the UI ever sees it.
+    _, client = app_and_client
+    resp = client.get("/v1/models", headers={"Origin": "http://localhost:5173"})
+    assert resp.status_code == 200
+    assert resp.headers["access-control-allow-origin"] == "http://localhost:5173"
+
+
+def test_cors_preflight_on_runs_allows_the_dev_origin(app_and_client):
+    _, client = app_and_client
+    resp = client.options(
+        "/runs",
+        headers={
+            "Origin": "http://localhost:5173",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+    assert resp.status_code == 200
+    assert resp.headers["access-control-allow-origin"] == "http://localhost:5173"
