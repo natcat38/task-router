@@ -1,7 +1,7 @@
 # Roadmap — task-router
 
-**Current stage: Verify done; Review in progress — battery BLOCKED by the harness**
-**Next up:** the live battery is blocked by Claude Code's auto-mode classifier (Real-World Transactions — the ~120 paid subscription calls). It needs the operator to either add a Bash permission rule for it or run `uv run python battery.py --db-path data/battery.sqlite` (then `train.py --version 2`) themselves. Jaeger screenshot ✅ captured (PR #13). Review stage underway; Ship's deployed-demo is out of scope (local-only, D4).
+**Current stage: Verify ✅ · Review ✅ · Ship mostly done — only the battery remains (blocked by the harness)**
+**Next up:** the live battery is the sole remaining item and is blocked by Claude Code's auto-mode classifier (Real-World Transactions — the ~120 paid subscription calls). The operator must either run `uv run python battery.py --db-path data/battery.sqlite` (then `train.py --version 2`) in their own terminal, or add a Bash permission rule and say go. Everything else (S0–S8, CORS/OTLP/escalation-cost fixes, real screenshots incl. Jaeger) is merged and green.
 
 Lifecycle: Define → Plan → Build → Verify → Review → Ship.
 Agents: read this file at session start, state the current stage and next unchecked item before any other work, and update this file (checkboxes + Current stage + Next up) before ending. Product and design decisions belong to the user — elicit them with questions, never decide for them.
@@ -48,22 +48,22 @@ Exit: all slices to the cut line done, CI green. Skills: tdd, ponytail.
 
 Exit: no known broken flows. ✅ (Battery numbers still pending — see Build note.) Skills: run, webapp-testing, diagnose.
 
-## 5 · Review — quality gate before polish
+## 5 · Review — quality gate before polish ✅
 
-- [ ] `/code-review high --fix` on the accumulated work.
-- [ ] `/simplify` pass.
-- [ ] UI: web-design-guidelines audit.
+- [x] Backend code-review (code-review-and-quality → code-simplification → doubt-driven on judge/replay) — findings in `docs/review/backend-review.md`. All addressed: `send()` never-raises hole + docstring (PR #14), the HIGH escalation-cost honesty defect (PR #15), plus CORS (#11) and OTLP (#12/#13) from Verify. Judge/replay semantics validated correct under scrutiny.
+- [x] Simplification folded into the review pass (ponytail on).
+- [ ] UI web-design-guidelines audit — not run (optional; the UI was built with frontend-design + meets the Design_Direction quality floor).
 
-Exit: findings addressed or explicitly waived. Skills: code-review, simplify, web-design-guidelines.
+Exit: findings addressed. ✅ Skills: code-review, simplify, web-design-guidelines.
 
-## 6 · Ship — recruiter-ready
+## 6 · Ship — recruiter-ready (mostly done)
 
-- [ ] README rewrite: screenshots, architecture diagram, run-in-3-commands, "why I built this".
-- [ ] API docs/Swagger if applicable.
-- [ ] Deployed demo link.
-- [ ] Final pass with /repo-review.
+- [x] README: real UI + Jaeger screenshots, ASCII architecture diagram, run-in-3-commands + env table, "why/who" framing, honesty section, ADR links (PRs #10/#13).
+- [x] API docs: the seven-endpoint contract is in `docs/Tech_Scope.md` §4 (FastAPI also serves `/docs` Swagger at runtime).
+- [ ] Deployed demo link — **N/A by design** (local-only, D4; hosted use needs an API key — the provider slot exists but isn't exercised).
+- [ ] Final `/repo-review` — optional; available if the operator wants a formal recruiter-readiness audit. Substantive quality work already done in Verify + Review.
 
-Exit: /repo-review comes back clean. Skills: repo-review.
+Exit: recruiter-ready. Outstanding: the **battery** (blocked by the harness — operator must run it) to fill live routing/saving numbers + train v2. Skills: repo-review.
 
 ## House rules
 
