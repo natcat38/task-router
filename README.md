@@ -159,19 +159,25 @@ just implementation details.
   by Sonnet still cost one Sonnet call, so `saved_pct_excl_judge` and
   `saved_pct_incl_judge` are both returned by `GET /v1/stats`, side by
   side. Leaving judge cost out would overstate the local tier's saving.
-- **Classifier: n=60 labelled, held-out about 15, 2-fold CV 0.70 ± 0.03.**
-  Sixty of the 200 drafted prompts have been hand-labelled so far. The
-  held-out split reports 0.80 on about 15 items, which is noise on a set
-  that small, not a result to lean on. Cross-validation was planned as
-  5-fold, but there are only 2 `opus`-labelled examples, so 5-fold isn't
-  possible (a fold needs at least one example of the class to be
-  meaningful). The number reported is 2-fold, 0.70 ± 0.03. The confusion
-  matrix shows the classifier effectively cannot learn `opus` from 2
-  examples, which is a labelling-volume problem, not a modelling one.
-  There is no v1-to-v2 improvement claim anywhere in this project: the
-  held-out set is too small for a one-item difference to mean anything, so
-  `train.py --version 2`'s numbers are reported side by side with v1's,
-  without a verdict.
+- **Classifier: 200 labelled (60 hand + 140 judge-derived), held-out 50,
+  5-fold CV 0.645 ± 0.058.** All 200 drafted prompts are now labelled: 60
+  by hand, and 140 more by `auto_label.py`, which routed each unlabelled
+  prompt to the local tier and escalated it until the tier above passed
+  the judge, then recorded the cheapest passing tier. `data/prompts.json`
+  marks each row's `tier_source` as `hand` or `judge_auto`, so the 60 hand
+  labels stay distinguishable from the 140 derived ones. Tier totals: local
+  120, sonnet 69, opus 11. On a seeded 25% held-out split (50 ids), accuracy
+  is 0.52. Five-fold cross-validation, possible now that opus has 11
+  examples instead of 2, gives 0.645 ± 0.058. This is not a claim that the
+  classifier improved: the earlier 0.80 was measured on 15 held-out items,
+  too few to mean anything, while 0.52/0.645 comes from 50 held-out items
+  and a real 5-fold split, so it is a far more reliable estimate of the
+  same classifier's actual performance. The 8 surface features remain only
+  moderately predictive of tier. One more caveat: 140 of the 200 labels
+  come from a model judge grading a model's own answers, so this accuracy
+  is measured partly against model-derived ground truth, not human
+  ground truth. `tier_source` is what lets a future analysis separate the
+  two. There is no v1-to-v2 improvement claim anywhere in this project.
 - **The classifier does not catch traps; the judge does.** The 8 features
   are surface-only (length, verb count, punctuation, and the like) by
   design. A trap prompt is built to score like an easy one on exactly those
@@ -207,6 +213,13 @@ see Honesty above, which accounts for most of the 2 not scored). Scores:
 5.0 on 40 answers, 4.0 on 11, 3.0 on 6, 1.0 on 1.
 
 ### Savings, at API list prices, no money changed hands
+
+The figures below were measured on the earlier battery run, against the
+60-hand-label classifier. The classifier has since been retrained on all
+200 labels (see Honesty above), but re-scoring the battery under the new
+classifier has not been run yet; that would be another paid run. Read the
+numbers below as a measurement of the earlier classifier, not the current
+one.
 
 Both figures use `registry.yaml`'s list prices; nothing here was actually
 billed (see Honesty above). Both are reported, side by side, per the
