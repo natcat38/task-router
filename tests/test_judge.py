@@ -212,7 +212,7 @@ def test_low_score_escalates_exactly_one_tier_local_to_sonnet(conn, tracer, rout
                 return _result('{"score": 2, "reason": "wrong facts"}', cost=0.002)
             if model == "opus":
                 return _result('{"score": 5, "reason": "good now"}', cost=0.01)
-        return _result(f"{model} answer")
+        return _result(f"{model} answer", cost=0.004)  # the re-answer call itself costs real money
 
     _insert_run(conn, RUN_ID, "local", "qwen3:1.7b", "local answer")
     _judge(
@@ -231,6 +231,11 @@ def test_low_score_escalates_exactly_one_tier_local_to_sonnet(conn, tracer, rout
     assert run["judge_score"] == 5  # final judge outcome, once the swapped answer passed
     assert run["judge_label"] == "pass"
     assert run["judge_cost"] > 0  # both judge calls (sonnet + opus) counted
+    # Regression test for backend review Finding #1: the escalation
+    # re-answer's real cost must be accumulated and persisted, not dropped.
+    # One re-answer call happened (local -> sonnet), so escalation_cost is
+    # exactly that call's cost.
+    assert run["escalation_cost"] == pytest.approx(0.004)
 
 
 def test_passing_score_does_not_escalate(conn, tracer, routing_yaml):
@@ -252,6 +257,7 @@ def test_passing_score_does_not_escalate(conn, tracer, routing_yaml):
     assert run["judge_score"] == 5
     assert run["judge_label"] == "pass"
     assert run["judge_cost"] > 0
+    assert run["escalation_cost"] == 0  # no escalation happened -- nothing to accumulate
 
 
 def test_failing_sonnet_answer_escalates_to_opus_one_step(conn, tracer, routing_yaml):

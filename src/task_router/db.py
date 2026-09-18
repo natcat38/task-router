@@ -43,7 +43,9 @@ CREATE TABLE IF NOT EXISTS runs (
     cost_all_tiers TEXT,
     forced_tier TEXT,
     judge_cost REAL NOT NULL DEFAULT 0,
-    use_case TEXT
+    use_case TEXT,
+    answer_cost REAL NOT NULL DEFAULT 0,
+    escalation_cost REAL NOT NULL DEFAULT 0
 )
 """
 
@@ -110,4 +112,15 @@ def init_db(conn: sqlite3.Connection) -> None:
     # request-time value passed to the judge job. Added here, nullable, so
     # pre-S5 DB files migrate cleanly (existing rows read back use_case=None).
     _ensure_column(conn, "runs", "use_case", "TEXT")
+    # Honesty-contract fix (backend review Finding #1): `cost_all_tiers`
+    # alone can't answer "what did this run actually cost" once escalation
+    # overwrites tier_chosen -- it's indexed by tier, and the tier changes
+    # out from under it. `answer_cost` (the real cost of the initial routed
+    # answer) and `escalation_cost` (the real cost of any re-answer calls,
+    # accumulated across hops) are persisted independently so GET /v1/stats
+    # can sum actual incurred cost instead of re-deriving a hypothetical one
+    # from the wrong tier's estimate. Defaulted to 0 so pre-existing rows
+    # (and the demo fixture) migrate cleanly.
+    _ensure_column(conn, "runs", "answer_cost", "REAL NOT NULL DEFAULT 0")
+    _ensure_column(conn, "runs", "escalation_cost", "REAL NOT NULL DEFAULT 0")
     conn.commit()
