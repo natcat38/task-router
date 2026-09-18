@@ -9,9 +9,11 @@ on a sampled fraction (`judge_sample_rate` in routing.yaml). A score below
 the use case's `judge_threshold` escalates exactly one tier -- never
 straight to the top -- and the winning answer is swapped into the `runs`
 row. If the escalated answer is *also* judged below threshold and another
-tier remains above it, escalation repeats one more step (Tech_Scope §3
-step 7's "if still under threshold and another tier remains, escalate
-again one step").
+tier remains above it, escalation repeats one more step: never skipping a
+tier, but not capped at a single hop either -- this is why Tech_Scope §2
+types `escalation_chain` as an *array* of `{tier, model, reason}` entries
+rather than a single object, matching Product_Scope §3.2's "escalated one
+tier at a time."
 
 `judge_and_escalate()` is the entire background job. api.py schedules it as
 a FastAPI `BackgroundTask` so it runs strictly after the response has

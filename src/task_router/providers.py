@@ -152,17 +152,28 @@ def _send_claude_cli(prompt: str, model_id: str, runner: RunnerFn, cost_fn) -> R
     try:
         text_out = payload["result"]
         usage = payload["usage"]
-        input_tokens = usage["input_tokens"]
-        output_tokens = usage["output_tokens"]
-    except (KeyError, TypeError) as exc:
+        # int(...) both validates and normalizes: a well-formed response has
+        # these as ints already, but coercing here (rather than using them
+        # raw) means a numeric-looking-but-wrong-type field (e.g. a string)
+        # is caught by the except clause below instead of raising out of
+        # cost_fn()'s arithmetic below send()'s try/except -- see
+        # test_send_claude_cli_non_numeric_usage_becomes_error_field.
+        input_tokens = int(usage["input_tokens"])
+        output_tokens = int(usage["output_tokens"])
+    except (KeyError, TypeError, ValueError) as exc:
         return _empty_error_result(f"claude -p response missing expected field: {exc}")
+
+    try:
+        cost = cost_fn(model_id, input_tokens, output_tokens)
+    except Exception as exc:  # noqa: BLE001 -- send() must never raise
+        return _empty_error_result(f"claude -p cost computation failed: {exc}")
 
     return {
         "text": text_out,
         "input_tokens": input_tokens,
         "output_tokens": output_tokens,
         "latency": latency,
-        "cost": cost_fn(model_id, input_tokens, output_tokens),
+        "cost": cost,
         "error": None,
     }
 
