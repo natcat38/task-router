@@ -1,7 +1,7 @@
 # Roadmap — task-router
 
-**Current stage: Verify ✅ · Review ✅ · Ship mostly done — only the battery remains (blocked by the harness)**
-**Next up:** the live battery is the sole remaining item and is blocked by Claude Code's auto-mode classifier (Real-World Transactions — the ~120 paid subscription calls). The operator must either run `uv run python battery.py --db-path data/battery.sqlite` (then `train.py --version 2`) in their own terminal, or add a Bash permission rule and say go. Everything else (S0–S8, CORS/OTLP/escalation-cost fixes, real screenshots incl. Jaeger) is merged and green.
+**Current stage: DONE — Define→Ship complete; battery run, real numbers in the README**
+**Next up:** nothing required. Optional follow-ups: a formal `/repo-review`; a hosted demo (needs an API key — out of scope, D4); more/balanced opus labels + a sub-1.0 `judge_sample_rate` re-run if the operator later wants the router to show a positive saving.
 
 Lifecycle: Define → Plan → Build → Verify → Review → Ship.
 Agents: read this file at session start, state the current stage and next unchecked item before any other work, and update this file (checkboxes + Current stage + Next up) before ending. Product and design decisions belong to the user — elicit them with questions, never decide for them.
@@ -55,6 +55,10 @@ Exit: no known broken flows. ✅ (Battery numbers still pending — see Build no
 - [ ] UI web-design-guidelines audit — not run (optional; the UI was built with frontend-design + meets the Design_Direction quality floor).
 
 Exit: findings addressed. ✅ Skills: code-review, simplify, web-design-guidelines.
+
+## Battery (ran 2026-09-18)
+
+- [x] Operator ran the battery (60/60, 0 failures) after the UTF-8 `claude -p` decode fix (PR #17). Real numbers now in README "Results (measured)": routed local 27 / sonnet 26 / opus 7; 17 escalations; **saved −11.6% excl-judge / −68.6% incl-judge** (router cost more than all-Opus on this run — honest, with the three reasons + levers). `feedback.py` → 11 weighted rows; `train.py --version 2` held-out 0.40 vs v1 0.80 (v2 did **not** improve; reported side by side, no claim). Run artifacts (`data/battery.sqlite`, `data/feedback.json`) kept local/gitignored.
 
 ## 6 · Ship — recruiter-ready (mostly done)
 
