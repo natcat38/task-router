@@ -35,12 +35,14 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable, Optional
 
 from fastapi import BackgroundTasks, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from opentelemetry import trace as trace_api
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -60,6 +62,19 @@ SendFn = Callable[..., dict]
 SelectTierFn = Callable[[dict], str]
 
 KNOWN_TIERS = ("local", "sonnet", "opus")
+
+# Dev UI (Vite) origins allowed to call this API when `CORS_ALLOW_ORIGINS`
+# is not set. This is a localhost single-user dev tool -- no auth/session
+# cookies cross the boundary, so allowing all methods/headers for these
+# origins is not a meaningful attack surface.
+DEFAULT_CORS_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
+
+
+def _cors_origins() -> list[str]:
+    raw = os.environ.get("CORS_ALLOW_ORIGINS")
+    if not raw:
+        return list(DEFAULT_CORS_ORIGINS)
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
 
 
 class CompletionRequest(BaseModel):
@@ -146,6 +161,12 @@ def create_app(
     tracer, provider = tracing_module.setup_tracing(conn)
 
     app = FastAPI(title="task-router")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_cors_origins(),
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     FastAPIInstrumentor.instrument_app(app, tracer_provider=provider)
 
     def _run_pipeline(
