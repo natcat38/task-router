@@ -206,12 +206,16 @@ spans can optionally dual-export to any OTLP collector, Jaeger included,
 for a second view of the same trace:
 
 1. `docker run -d --name jaeger -p 16686:16686 -p 4318:4318 jaegertracing/all-in-one:latest`
-2. `set OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318` (PowerShell:
+2. Install the OTLP exporter extra first -- it's optional and not part of
+   the core dependencies: `uv sync --extra otlp`.
+3. `set OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318` (PowerShell:
    `$env:OTEL_EXPORTER_OTLP_ENDPOINT = "http://localhost:4318"`), then start
    the backend as above. `tracing.py` only imports the OTLP exporter
-   package when this variable is set, so it costs nothing when unset.
-3. Make a request: `POST /v1/completions` with a `prompt` and `use_case`.
-4. Open `http://localhost:16686`, select service `task-router`, and find
+   package when this variable is set, so it costs nothing when unset --
+   but it must be installed first (step 2) or setting the endpoint raises
+   a clear error telling you to run that command.
+4. Make a request: `POST /v1/completions` with a `prompt` and `use_case`.
+5. Open `http://localhost:16686`, select service `task-router`, and find
    the trace: `router.classify` → `router.select_tier` → `chat <model>` →
    `router.judge` → `router.escalate` as a waterfall.
 
