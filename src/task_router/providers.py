@@ -69,9 +69,23 @@ def _default_runner(
     timeout: float,
     env: dict,
 ):
-    """Real subprocess.run wrapper for `claude -p`."""
+    """Real subprocess.run wrapper for `claude -p`.
+
+    `encoding="utf-8"` (with `errors="replace"`) is required on top of
+    `text=True`: without it, Windows decodes stdout with the locale codec
+    (cp1252), and a UTF-8 byte cp1252 can't map (e.g. an em-dash in
+    claude -p's JSON output) raises UnicodeDecodeError inside subprocess's
+    reader thread, leaving `completed.stdout` as None.
+    """
     return subprocess.run(
-        args, input=input, capture_output=capture_output, text=text, timeout=timeout, env=env
+        args,
+        input=input,
+        capture_output=capture_output,
+        text=text,
+        encoding="utf-8",
+        errors="replace",
+        timeout=timeout,
+        env=env,
     )
 
 
@@ -144,9 +158,12 @@ def _send_claude_cli(prompt: str, model_id: str, runner: RunnerFn, cost_fn) -> R
             f"claude -p exited {completed.returncode}: {completed.stderr.strip()[:500]}"
         )
 
+    if not completed.stdout:
+        return _empty_error_result("claude -p produced no decodable stdout")
+
     try:
         payload = json.loads(completed.stdout)
-    except json.JSONDecodeError as exc:
+    except (json.JSONDecodeError, TypeError) as exc:
         return _empty_error_result(f"claude -p returned invalid JSON: {exc}")
 
     try:
