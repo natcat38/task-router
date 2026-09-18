@@ -1,7 +1,7 @@
 # Roadmap — task-router
 
-**Current stage: Build complete (sprint S0–S8 shipped) — awaiting operator "go" for the live battery**
-**Next up:** (operator's call) run the live battery (`uv run python battery.py` → `train.py --version 2`) to fill in routing/saving numbers + train v2, then capture the Jaeger screenshot; then the Verify → Review → Ship stages. Nothing is blocked on the executor.
+**Current stage: Verify done; Review in progress — battery BLOCKED by the harness**
+**Next up:** the live battery is blocked by Claude Code's auto-mode classifier (Real-World Transactions — the ~120 paid subscription calls). It needs the operator to either add a Bash permission rule for it or run `uv run python battery.py --db-path data/battery.sqlite` (then `train.py --version 2`) themselves. Jaeger screenshot ✅ captured (PR #13). Review stage underway; Ship's deployed-demo is out of scope (local-only, D4).
 
 Lifecycle: Define → Plan → Build → Verify → Review → Ship.
 Agents: read this file at session start, state the current stage and next unchecked item before any other work, and update this file (checkboxes + Current stage + Next up) before ending. Product and design decisions belong to the user — elicit them with questions, never decide for them.
@@ -41,12 +41,12 @@ Exit: numbered vertical slices exist and the user approves. ⏳ Awaiting Build s
 
 Exit: all slices to the cut line done, CI green. Skills: tdd, ponytail.
 
-## 4 · Verify — does the real thing work
+## 4 · Verify — does the real thing work ✅
 
-- [ ] Run the actual app end-to-end (not just tests): the happy path plus each hard rule from Product_Scope.
-- [ ] UI: check the built screens against Design_Direction.md — states (loading/empty/error), 375px, keyboard focus.
+- [x] Ran the actual app end-to-end (real Ollama + FastAPI + React UI + Jaeger). Found and fixed two real bugs the mocked tests missed: **missing CORS** (UI couldn't reach the API — PR #11) and the **OTLP base-endpoint path** (Jaeger export needed `/v1/traces` — PR #13). Live smoke + all read endpoints confirmed.
+- [x] UI checked in-browser: runs list / waterfall / replay panel / stats all render real data; responsive card layout at narrow width; error/empty states present. Screenshots captured (`docs/img/`).
 
-Exit: no known broken flows. Skills: run, webapp-testing, diagnose.
+Exit: no known broken flows. ✅ (Battery numbers still pending — see Build note.) Skills: run, webapp-testing, diagnose.
 
 ## 5 · Review — quality gate before polish
 
