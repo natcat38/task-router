@@ -3,6 +3,8 @@
 **Current stage: DONE — Define→Ship complete; battery run, real numbers in the README**
 **Next up:** nothing required. Optional follow-ups: a formal `/repo-review`; a hosted demo (needs an API key — out of scope, D4); more/balanced opus labels + a sub-1.0 `judge_sample_rate` re-run if the operator later wants the router to show a positive saving.
 
+**Post-ship addition (2026-09-18):** `auto_label.py` — derives the cheapest judge-passing tier for the ~140 still-unlabelled `data/prompts.json` rows (forced-`local` start, judge sampled at 1.0, escalate until pass; opus is the ceiling). Built + fake-tested only (16 new tests, fake provider, temp DB) — NOT run against real models. `--merge` (free) fills derived labels into `data/prompts.json` and stamps `tier_source` ("hand" vs "judge_auto") so the operator's original 60 stay distinguishable. The real paid run (`uv run python auto_label.py`, then `--merge`, then `uv run python train.py --version 2`) still awaits the operator's explicit "go", same gating as the S7 battery.
+
 Lifecycle: Define → Plan → Build → Verify → Review → Ship.
 Agents: read this file at session start, state the current stage and next unchecked item before any other work, and update this file (checkboxes + Current stage + Next up) before ending. Product and design decisions belong to the user — elicit them with questions, never decide for them.
 
