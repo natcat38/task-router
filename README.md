@@ -200,31 +200,29 @@ just implementation details.
 
 ## Results (measured)
 
-The battery ran for real against all 60 labelled prompts, on the
-operator's own Max subscription (`claude -p`, never `--bare`). All 60
-requests completed; 0 failures.
+Two battery runs exist. Both ran for real on the operator's own Max
+subscription (`claude -p`, never `--bare`); both are reported at
+`registry.yaml`'s list prices, nothing actually billed (see Honesty
+above).
 
-Final tier, after any escalation: local 27, sonnet 26, opus 7. Seventeen
-requests escalated: 11 reached a confirmed-passing Sonnet answer, and 6
-escalated all the way to Opus.
+| | Run A (60 hand labels) | Run B (200 labels, retrained) |
+|---|---|---|
+| Prompts | 60 | 200 (201 runs recorded, 1 duplicate row) |
+| Failures | 0 | 0 |
+| Routed tiers | local 27 / sonnet 26 / opus 7 | local 120 / sonnet 73 / opus 8 |
+| Escalations | 17 | 46 |
+| Saved, excl. judge | **-11.6%** | **+50.9%** |
+| Saved, incl. judge | **-68.6%** | **+8.1%** |
 
-The judge scored 58 of the 60 answers (Opus answers are never judged,
-see Honesty above, which accounts for most of the 2 not scored). Scores:
-5.0 on 40 answers, 4.0 on 11, 3.0 on 6, 1.0 on 1.
+### Run A: 60 hand labels (earlier)
 
-### Savings, at API list prices, no money changed hands
+All 60 requests completed; 0 failures. Final tier, after any escalation:
+local 27, sonnet 26, opus 7. Seventeen requests escalated: 11 reached a
+confirmed-passing Sonnet answer, and 6 escalated all the way to Opus.
 
-The figures below were measured on the earlier battery run, against the
-60-hand-label classifier. The classifier has since been retrained on all
-200 labels (see Honesty above), but re-scoring the battery under the new
-classifier has not been run yet; that would be another paid run. Read the
-numbers below as a measurement of the earlier classifier, not the current
-one.
-
-Both figures use `registry.yaml`'s list prices; nothing here was actually
-billed (see Honesty above). Both are reported, side by side, per the
-project's own honesty rules (`docs/Product_Scope.md` §4,
-`docs/research/SPRINT-PLAN.md` §8):
+The judge scored 58 of the 60 answers (Opus answers are never judged, see
+Honesty above, which accounts for most of the 2 not scored). Scores: 5.0
+on 40 answers, 4.0 on 11, 3.0 on 6, 1.0 on 1.
 
 - Excluding judge cost: **-11.6%**. Answer calls cost $0.079, escalation
   calls cost $0.247, for $0.327 total, against an all-Opus baseline of
@@ -235,31 +233,75 @@ project's own honesty rules (`docs/Product_Scope.md` §4,
 On this run, the router cost more than sending every request straight to
 Opus. That's the honest result, stated plainly, not spun.
 
-### Why it cost more, not less
+#### Why Run A cost more, not less
 
 1. `judge_sample_rate` was set to 1.0 for this run (proof mode: every
    request judged, not sampled). Each judge call sends the prompt and
    answer to the tier above, so judge cost alone is about 57% of the whole
    all-Opus baseline by itself. Production use would sample instead, for
    example 0.1 to 0.2.
-2. The classifier is still weak (60 labels total, only 2 labelled opus),
-   so it under-routes: 17 escalations, 6 of them all the way to Opus. Each
+2. The classifier was still weak (60 labels total, only 2 labelled opus),
+   so it under-routed: 17 escalations, 6 of them all the way to Opus. Each
    of those pays for the cheap answer and the escalated answer.
 3. The all-Opus baseline is estimated from each request's routed-answer
    token counts, not from a real Opus call made per request. That
    under-counts what all-Opus would actually cost and biases the
    comparison against the router.
 
+### Run B: 200 labels, retrained classifier (new)
+
+The classifier was retrained on all 200 labels (60 hand + 140
+judge-derived via `auto_label.py`; see Honesty above). This re-score then
+ran all 200 labelled prompts against that retrained classifier: 201 runs
+recorded (one duplicate row), 0 failures across the 200 prompts.
+
+Final tier, after any escalation: local 120, sonnet 73, opus 8.
+Forty-six requests escalated.
+
+Judge scores: 5.0 on 140 answers, 4.0 on 46, 3.0 on 6, 2.0 on 4, 1.0 on 2.
+
+- Excluding judge cost: **+50.9%**.
+- Including judge cost: **+8.1%**.
+
+Both figures are positive even with `judge_sample_rate` still at 1.0 (every
+request judged, the worst case for the included-judge figure; see Honesty
+above).
+
+#### Why Run B flipped positive
+
+The retrained classifier has learned enough about the opus tier to route
+about 60% of requests to the free local tier, and the judge accepts most
+of those answers. That leaves far fewer escalations relative to the
+all-Opus baseline than Run A had, so the router comes out ahead instead of
+behind.
+
+#### The catch: Run B is partly self-referential
+
+The 140 judge-derived labels were produced by the same judge that scores
+this battery: each one is the cheapest tier whose answer that judge
+accepted. And the judge is lenient here: 186 of the 198 scored answers
+came back at 4 or above. So the classifier was trained to route toward
+tiers this judge already accepts, and the same judge then accepts them
+again at scoring time. The local-heavy routing behind the +50.9% figure is
+circular to that extent.
+
+**Run A, measured on 60 independent hand labels, is the more trustworthy
+figure for real-world saving.** The true saving is probably somewhere
+between Run A's -11.6% and Run B's +50.9%. Settling it needs either a
+stricter or independent judge, or more hand labels in place of the
+judge-derived ones.
+
 ### What would change this
 
-More labelled examples, especially opus ones, would cut escalations by
-giving the classifier something to learn `opus` from. A judge sample rate
-below 1.0 would cut most of the loss directly, since judge cost is the
-biggest single factor above. Neither change has been made here on purpose:
-the point of this run is to show the tool correctly measuring a case where
-routing does not pay off, not to report a headline saving. This project's
-value is the honest measurement, the full instrumentation, and the
-routing-pipeline replay debugger, not this number.
+More independent hand labels, especially opus ones, would let the
+classifier learn `opus` without leaning on the judge's own leniency. A
+judge sample rate below 1.0 would also change the incl-judge figure
+directly for both runs, since judge cost is a large share of it either
+way. Neither change has been made here on purpose: the point of these
+runs is to show the tool correctly measuring both a case where routing
+pays off and one where it doesn't, not to report a single headline saving.
+This project's value is the honest measurement, the full instrumentation,
+and the routing-pipeline replay debugger, not either number on its own.
 
 ### Classifier: v1 vs v2, no improvement claim
 
