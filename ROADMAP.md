@@ -1,9 +1,13 @@
 # Roadmap — task-router
 
-**Current stage: DONE — Define→Ship complete; auto-labelled to 200, retrained, re-scored (both runs in README)**
+**Current stage: DONE — Define→Ship complete; 82 hand + 118 judge-derived labels, retrained; re-score on the hand-corrected labels is optional**
 **Next up:** nothing required. Optional follow-ups: a formal `/repo-review`; a hosted demo (needs an API key — out of scope, D4); more/balanced opus labels + a sub-1.0 `judge_sample_rate` re-run if the operator later wants the router to show a positive saving.
 
-**Post-ship addition (2026-09-18/20):** `auto_label.py` (PR #19) derived tiers for the 140 unlabelled rows (forced-`local`, escalate to first judge-pass). Operator ran it (140/140) → merged to 200 labels (60 hand + 140 judge_auto, `tier_source`-tagged, PR #20) → retrained (held-out 0.52 / 5-fold CV 0.645±0.058, opus now learnable). Operator re-ran the full 200-row scoring battery → **Run B: +50.9% excl-judge / +8.1% incl-judge** (both positive) vs the earlier **Run A (60 hand): −11.6% / −68.6%**. Both in the README with a prominent self-referential caveat (Run B's 140 labels came from the same lenient judge that scores it; Run A is the more trustworthy measure). PRs #19–#21. No open work.
+**Post-ship addition (2026-09-18/20):** `auto_label.py` (PR #19) derived tiers for the 140 unlabelled rows (forced-`local`, escalate to first judge-pass). Operator ran it (140/140) → merged to 200 labels (60 hand + 140 judge_auto, `tier_source`-tagged, PR #20) → retrained (held-out 0.52 / 5-fold CV 0.645±0.058, opus now learnable). Operator re-ran the full 200-row scoring battery → **Run B: +50.9% excl-judge / +8.1% incl-judge** (both positive) vs the earlier **Run A (60 hand): −11.6% / −68.6%**. Both in the README with a prominent self-referential caveat (Run B's 140 labels came from the same lenient judge that scores it; Run A is the more trustworthy measure). PRs #19–#21.
+
+**2026-09-24:** operator reviewed a 69-candidate worksheet and hand-labelled 30 prompts as opus (p135–p156, p179–p184, p186, p187) → 200 labels = 82 hand + 118 judge_auto; tiers local 102 / sonnet 57 / opus 41. Retrained: held-out 0.46 / 5-fold CV 0.525±0.047 (lower, reported straight — the surface features can't separate opus; opus recall 2/10). PR #22. Stray logs, scratch DBs and stale branches cleaned up.
+
+**Open (optional, operator's call):** re-score on the hand-corrected labels (`uv run python battery.py --db-path data/battery3.sqlite --progress-path data/battery3_progress.json`, ~400 paid calls) for the least-circular savings number; `v0.1.0` tag + CHANGELOG (`git-workflow-and-versioning`, the one §4 Ship skill never run); `/repo-review`.
 
 Lifecycle: Define → Plan → Build → Verify → Review → Ship.
 Agents: read this file at session start, state the current stage and next unchecked item before any other work, and update this file (checkboxes + Current stage + Next up) before ending. Product and design decisions belong to the user — elicit them with questions, never decide for them.
