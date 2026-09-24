@@ -1207,79 +1207,79 @@
   },
   {
     "id": "p135",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Work out the answer: a train leaves at 2pm travelling at 60km/h, a second train leaves the same station at 2:30pm travelling at 90km/h in the same direction. What time does the second train catch up?",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p136",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Figure out the total cost: 3 items at $12.50 each with a 10% discount applied to the whole order, then 8% sales tax added after the discount.",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p137",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Work through this scheduling conflict and propose the best fix: Meeting A is 2-3pm with Alex and Dana, Meeting B is 2:30-3:30pm with Alex and Priya, and Alex cannot be in two places at once.",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p138",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Determine which of these two loan offers costs less in total interest: Loan A is $10,000 at 6% APR over 3 years. Loan B is $10,000 at 5% APR over 4 years.",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p139",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Reason through this staffing problem: a shift needs at least 2 people, 5 staff are available, 2 have already requested the same day off. Can the shift still be covered, and how?",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p140",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Work out how many days it will take to finish the backlog if the team clears 8 tickets a day, adds 3 new tickets a day, and starts with 140 tickets open.",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p141",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Figure out the break-even point: fixed costs are $4,000/month, each unit costs $8 to make and sells for $20.",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p142",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Reason about which server to scale first given this data: Server A is at 95% CPU with low memory use. Server B is at 60% CPU but swapping heavily due to low memory.",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p143",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Work out the seating arrangement: 6 people, 3 married couples, no couple can sit next to each other at a round table of 6.",
     "trap": false,
@@ -1288,61 +1288,61 @@
   },
   {
     "id": "p144",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Determine the fastest route: Route 1 is 40km at an average 80km/h. Route 2 is 32km but averages only 50km/h due to traffic.",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p145",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Every cat in the room is asleep. Milo is awake and in the room. Is Milo a cat?",
     "trap": true,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p146",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "All the lights in the building are off except one. The one light on is in the lobby. Is anyone in the lobby?",
     "trap": true,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p147",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Nobody on the team has ever missed a deadline. Sam just missed a deadline. Is Sam on the team?",
     "trap": true,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p148",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Every key on this ring opens the front door. This key doesn't open the front door. Is it on the ring?",
     "trap": true,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p149",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "All the apples in the bowl are red. This apple is green. Is it in the bowl?",
     "trap": true,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p150",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Each ticket in this batch is valid for one ride only. This ticket has been used twice. Was it in this batch?",
     "trap": true,
@@ -1351,7 +1351,7 @@
   },
   {
     "id": "p151",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Every employee badge grants access to the server room. Priya's badge does not grant access. Is Priya an employee?",
     "trap": true,
@@ -1360,25 +1360,25 @@
   },
   {
     "id": "p152",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "All the clocks in the office are five minutes fast. This clock reads the exact correct time. Is it one of the office clocks?",
     "trap": true,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p153",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Every bottle on this shelf is unopened. This bottle is half empty. Is it on the shelf?",
     "trap": true,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p154",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Each password on the list expired last week. This password still works today. Is it on the list?",
     "trap": true,
@@ -1387,16 +1387,16 @@
   },
   {
     "id": "p155",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "All the invoices in this folder are paid. This invoice is overdue. Is it in the folder?",
     "trap": true,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p156",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "reason",
     "prompt": "Every seat in the front row is reserved. This seat has no reservation. Is it in the front row?",
     "trap": true,
@@ -1603,16 +1603,16 @@
   },
   {
     "id": "p179",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "judge",
     "prompt": "Which of these two error messages is clearer for an end user, and why?\n\nA: 'Error 4021: Operation failed.'\nB: 'We couldn't save your changes because the file is too large. Try a file under 10MB.'",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p180",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "judge",
     "prompt": "Compare these two function implementations and judge which is more maintainable:\n\nA: a 60-line function doing validation, transformation, and saving in one block.\nB: three 20-line functions, one for each step, called in sequence.",
     "trap": false,
@@ -1621,16 +1621,16 @@
   },
   {
     "id": "p181",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "judge",
     "prompt": "Score this customer support reply from 1-5 for professionalism and explain the score:\n\n'idk why ur mad, we already refunded you, read the email next time'",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p182",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "judge",
     "prompt": "Judge which of these two PR titles better follows conventional commit style:\n\nA: 'fixed stuff'\nB: 'fix: correct null check in checkout flow'",
     "trap": false,
@@ -1639,16 +1639,16 @@
   },
   {
     "id": "p183",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "judge",
     "prompt": "Compare these two API designs and judge which is easier for a new developer to use correctly:\n\nA: POST /users/{id}/actions with a body specifying the action type.\nB: separate endpoints like POST /users/{id}/suspend, POST /users/{id}/activate.",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p184",
-    "tier": "sonnet",
+    "tier": "opus",
     "use_case": "judge",
     "prompt": "Rate this piece of code for readability on a 1-5 scale and justify the score:\n\ndef f(x,y,z):\n  return x*y+z if z>0 else x*y-z",
     "trap": false,
@@ -1666,21 +1666,21 @@
   },
   {
     "id": "p186",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "judge",
     "prompt": "Compare these two resignation letters and judge which leaves a better impression:\n\nA: a two-line email saying 'I quit, effective immediately.'\nB: a short note thanking the team, giving two weeks notice, and offering to help transition.",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p187",
-    "tier": "local",
+    "tier": "opus",
     "use_case": "judge",
     "prompt": "Judge whether this test actually verifies the behavior it claims to, and explain your reasoning:\n\ndef test_login_fails_with_wrong_password():\n    assert True",
     "trap": false,
     "notes": "",
-    "tier_source": "judge_auto"
+    "tier_source": "hand"
   },
   {
     "id": "p188",
