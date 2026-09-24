@@ -159,25 +159,28 @@ just implementation details.
   by Sonnet still cost one Sonnet call, so `saved_pct_excl_judge` and
   `saved_pct_incl_judge` are both returned by `GET /v1/stats`, side by
   side. Leaving judge cost out would overstate the local tier's saving.
-- **Classifier: 200 labelled (60 hand + 140 judge-derived), held-out 50,
-  5-fold CV 0.645 ± 0.058.** All 200 drafted prompts are now labelled: 60
-  by hand, and 140 more by `auto_label.py`, which routed each unlabelled
-  prompt to the local tier and escalated it until the tier above passed
-  the judge, then recorded the cheapest passing tier. `data/prompts.json`
-  marks each row's `tier_source` as `hand` or `judge_auto`, so the 60 hand
-  labels stay distinguishable from the 140 derived ones. Tier totals: local
-  120, sonnet 69, opus 11. On a seeded 25% held-out split (50 ids), accuracy
-  is 0.52. Five-fold cross-validation, possible now that opus has 11
-  examples instead of 2, gives 0.645 ± 0.058. This is not a claim that the
-  classifier improved: the earlier 0.80 was measured on 15 held-out items,
-  too few to mean anything, while 0.52/0.645 comes from 50 held-out items
-  and a real 5-fold split, so it is a far more reliable estimate of the
-  same classifier's actual performance. The 8 surface features remain only
-  moderately predictive of tier. One more caveat: 140 of the 200 labels
-  come from a model judge grading a model's own answers, so this accuracy
-  is measured partly against model-derived ground truth, not human
-  ground truth. `tier_source` is what lets a future analysis separate the
-  two. There is no v1-to-v2 improvement claim anywhere in this project.
+- **Classifier: 200 labelled (82 hand + 118 judge-derived), held-out 50,
+  5-fold CV 0.525 ± 0.047.** All 200 drafted prompts are labelled: 82 by
+  hand (the original 60, plus 30 the operator hand-corrected to `opus`
+  afterward, see Results below), and 118 more by `auto_label.py`, which
+  routed each unlabelled prompt to the local tier and escalated it until
+  the tier above passed the judge, then recorded the cheapest passing
+  tier. `data/prompts.json` marks each row's `tier_source` as `hand` or
+  `judge_auto`, so the 82 hand labels stay distinguishable from the 118
+  derived ones. Tier totals: local 102, sonnet 57, opus 41. On a seeded
+  25% held-out split (50 ids), accuracy is 0.460. Five-fold
+  cross-validation gives 0.525 ± 0.047. Held-out confusion matrix (rows
+  and columns ordered local/opus/sonnet): `[[14,5,7],[5,2,3],[6,1,7]]`.
+  This is not an improvement or regression claim against the earlier
+  0.645 ± 0.058: the label mix changed (30 rows moved to hand-labelled
+  opus, mostly off `judge_auto`), so the held-out and CV numbers moved
+  with the mix, not because of any change to the training code. The 8
+  surface features remain only moderately predictive of tier. One more
+  caveat: 118 of the 200 labels still come from a model judge grading a
+  model's own answers, so this accuracy is measured partly against
+  model-derived ground truth, not human ground truth. `tier_source` is
+  what lets a future analysis separate the two. There is no v1-to-v2
+  improvement claim anywhere in this project.
 - **The classifier does not catch traps; the judge does.** The 8 features
   are surface-only (length, verb count, punctuation, and the like) by
   design. A trap prompt is built to score like an easy one on exactly those
@@ -213,6 +216,20 @@ above).
 | Escalations | 17 | 46 |
 | Saved, excl. judge | **-11.6%** | **+50.9%** |
 | Saved, incl. judge | **-68.6%** | **+8.1%** |
+
+### Post-Run-B: 30 more hand-labelled opus prompts (not yet re-scored)
+
+After Run B, the operator reviewed a worksheet of judge_auto-labelled
+prompts and hand-confirmed 30 of them as `opus`, mostly reasoning and
+judge-facing prompts the auto-labeller had under-routed. `data/prompts.json`
+now has 82 hand labels and 118 judge-derived labels, up from 60/140, and
+the classifier was retrained on the new mix (new held-out and CV numbers
+are in Honesty above). Because those 30 labels came from the operator
+instead of the judge, a re-score run against this hand-corrected mix
+would remove most of Run B's circularity for the opus tier specifically.
+**That re-score has not been run yet.** The Run A and Run B numbers in
+the table and sections below are unchanged and still reflect the
+classifier as it stood before this correction.
 
 ### Run A: 60 hand labels (earlier)
 
