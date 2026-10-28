@@ -3,6 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { describeApiError, getRuns } from "../api/client";
 import type { Run, RunStatus, RunsListResponse } from "../api/types";
 import { isTier, TIER_ORDER } from "../api/tiers";
+import { StatusChip } from "../components/StatusChip";
+import { Timestamp } from "../components/Timestamp";
 import { TierChip } from "../components/TierChip";
 import { EmptyState, ErrorState, LoadingState } from "../components/StatusStates";
 
@@ -11,11 +13,6 @@ const STATUS_OPTIONS: RunStatus[] = ["ok", "error"];
 
 function shortId(id: string): string {
   return id.length > 10 ? `${id.slice(0, 10)}…` : id;
-}
-
-function formatTimestamp(iso: string): string {
-  const parsed = new Date(iso);
-  return Number.isNaN(parsed.getTime()) ? iso : parsed.toLocaleString();
 }
 
 /**
@@ -228,7 +225,9 @@ function RunRow({ run }: { run: Run }) {
           {shortId(run.run_id)}
         </Link>
       </td>
-      <td className="px-3 py-2 font-mono text-[13px] text-fog">{formatTimestamp(run.created_at)}</td>
+      <td className="px-3 py-2 font-mono text-[13px] text-fog">
+        <Timestamp iso={run.created_at} />
+      </td>
       <td className="px-3 py-2">{run.use_case ?? <span className="text-fog">-</span>}</td>
       <td className="px-3 py-2">
         <span className="inline-flex items-center gap-2">
@@ -237,7 +236,9 @@ function RunRow({ run }: { run: Run }) {
         </span>
       </td>
       <td className="px-3 py-2 font-mono text-[13px]">{run.model_used}</td>
-      <td className="px-3 py-2">{run.status}</td>
+      <td className="px-3 py-2">
+        <StatusChip status={run.status} />
+      </td>
     </tr>
   );
 }
@@ -259,13 +260,17 @@ function RunCard({ run }: { run: Run }) {
       </div>
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs text-fog">
         <dt>Created</dt>
-        <dd className="font-mono text-signal">{formatTimestamp(run.created_at)}</dd>
+        <dd className="font-mono text-signal">
+          <Timestamp iso={run.created_at} />
+        </dd>
         <dt>Use case</dt>
         <dd className="text-signal">{run.use_case ?? "-"}</dd>
         <dt>Model</dt>
         <dd className="font-mono text-signal">{run.model_used}</dd>
         <dt>Status</dt>
-        <dd className="text-signal">{run.status}</dd>
+        <dd className="text-signal">
+          <StatusChip status={run.status} />
+        </dd>
       </dl>
     </li>
   );
