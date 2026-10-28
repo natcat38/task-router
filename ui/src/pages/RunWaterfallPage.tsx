@@ -1,10 +1,15 @@
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import type { Ref } from "react";
 import { useParams } from "react-router-dom";
 import { ApiError, describeApiError, getRunSpans } from "../api/client";
 import type { Run, RunSpansResponse, Span, Tier } from "../api/types";
 import { TIER_COLOR, TIER_LABEL } from "../api/tiers";
 import { TierChip } from "../components/TierChip";
 import { ReplayPanel } from "../components/ReplayPanel";
+import { RequestResponse, RunInspector, inspectorPanelId } from "../components/RunInspector";
+import type { InspectorTab } from "../components/RunInspector";
+import { StatusChip } from "../components/StatusChip";
+import { Timestamp } from "../components/Timestamp";
 import { EmptyState, ErrorState, LoadingState } from "../components/StatusStates";
 
 /** A span plus its nesting depth, in the preorder the waterfall renders it. */
@@ -100,7 +105,7 @@ function RunHeader({ run }: { run: Run }) {
         <h1 className="break-all font-mono text-[18px] font-semibold text-signal sm:text-[22px]">
           Run {run.run_id}
         </h1>
-        <span className="font-mono text-[13px] text-fog">{run.status}</span>
+        <StatusChip status={run.status} />
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <TierChip tier={run.tier_chosen} />
@@ -120,36 +125,58 @@ function RunHeader({ run }: { run: Run }) {
           {run.total_duration_ms === null ? "-" : `${run.total_duration_ms}ms`}
         </dd>
         <dt>Created</dt>
-        <dd className="text-signal">{run.created_at}</dd>
+        <dd className="text-signal">
+          <Timestamp iso={run.created_at} />
+        </dd>
       </dl>
     </div>
   );
 }
 
+/**
+ * The waterfall's three columns, shared by the axis and every row so the axis
+ * can never drift from the bars again (it used to run 76 px wider than them):
+ * a name column, the flexible bar track, and a duration column. The widths
+ * and the row's `gap-2 px-1` live here, once.
+ */
+const ROW_LAYOUT = "flex w-full items-center gap-2 px-1";
+const NAME_COL = "w-28 shrink-0 sm:w-40 2xl:w-48";
+const DURATION_COL = "w-16 shrink-0";
+
+/** Under `sm` the bar track is only about 120 px wide, so the axis keeps just
+ * the start and end labels (and only the end label on the narrowest phones)
+ * instead of printing five labels on top of each other. */
 function TimeAxis({ totalRangeMs }: { totalRangeMs: number }) {
   const ticks = [0, 0.25, 0.5, 0.75, 1];
   return (
-    <div
-      aria-hidden="true"
-      className="relative ml-28 h-5 border-b border-line sm:ml-48"
-    >
-      {ticks.map((t) => (
-        <span
-          key={t}
-          className="absolute top-0 -translate-x-1/2 font-mono text-[11px] text-fog"
-          style={{ left: `${t * 100}%` }}
-        >
-          {(t * totalRangeMs).toFixed(0)}ms
-        </span>
-      ))}
+    <div aria-hidden="true" data-testid="time-axis" className={ROW_LAYOUT}>
+      <span className={NAME_COL} />
+      <div className="relative h-5 flex-1 border-b border-line">
+        {ticks.map((t) => (
+          <span
+            key={t}
+            className={`absolute top-0 font-mono text-[11px] text-fog ${
+              t === 0
+                ? "max-[339px]:hidden"
+                : t === 1
+                  ? "-translate-x-full"
+                  : "hidden -translate-x-1/2 sm:block"
+            }`}
+            style={{ left: `${t * 100}%` }}
+          >
+            {(t * totalRangeMs).toFixed(0)}ms
+          </span>
+        ))}
+      </div>
+      <span className={DURATION_COL} />
     </div>
   );
 }
 
 function SpanRow({
   node,
-  minStart,
   totalRange,
+  minStart,
   isSelected,
   onSelect,
 }: {
@@ -161,27 +188,34 @@ function SpanRow({
 }) {
   const { span, depth } = node;
   const tier = inferSpanTier(span.name);
-  const leftPct = ((span.start_ns - minStart) / totalRange) * 100;
-  const widthPct = Math.max(((span.end_ns - span.start_ns) / totalRange) * 100, 0.5);
+  const widthPct = Math.min(
+    Math.max(((span.end_ns - span.start_ns) / totalRange) * 100, 0.5),
+    100,
+  );
+  // Keep the minimum-width sliver inside the track instead of hanging past the end.
+  const leftPct = Math.min(((span.start_ns - minStart) / totalRange) * 100, 100 - widthPct);
 
   return (
     <button
       type="button"
+      data-span-id={span.span_id}
       onClick={() => onSelect(span)}
       aria-expanded={isSelected}
-      className={`flex w-full items-center gap-2 rounded px-1 py-1 text-left transition-standard hover:bg-ink ${
+      aria-controls={inspectorPanelId("span")}
+      className={`${ROW_LAYOUT} rounded py-1 text-left transition-standard hover:bg-ink ${
         isSelected ? "bg-ink" : ""
       }`}
     >
       <span
-        className="w-28 shrink-0 truncate font-mono text-[13px] text-signal sm:w-48"
+        className={`${NAME_COL} truncate font-mono text-[13px] text-signal`}
         style={{ paddingLeft: `${depth * 12}px` }}
         title={span.name}
       >
         {span.name}
       </span>
-      <span className="relative h-4 flex-1 rounded-sm bg-ink">
+      <span data-testid="span-track" className="relative h-4 flex-1 rounded-sm bg-ink">
         <span
+          data-testid="span-bar"
           className="absolute top-0 h-full rounded-sm motion-safe:transition-standard"
           style={{
             left: `${leftPct}%`,
@@ -190,25 +224,36 @@ function SpanRow({
           }}
         />
       </span>
-      <span className="w-16 shrink-0 text-right font-mono text-[13px] text-fog">
+      <span className={`${DURATION_COL} text-right font-mono text-[13px] text-fog`}>
         {durationMs(span).toFixed(1)}ms
       </span>
     </button>
   );
 }
 
-function AttributeDrawer({ span, onClose }: { span: Span; onClose: () => void }) {
+function AttributeDrawer({
+  span,
+  onClose,
+  headingRef,
+}: {
+  span: Span;
+  onClose: () => void;
+  headingRef: Ref<HTMLHeadingElement>;
+}) {
   const entries = Object.entries(span.attributes ?? {});
   const genAiEntries = entries.filter(([key]) => key.startsWith("gen_ai."));
   const otherEntries = entries.filter(([key]) => !key.startsWith("gen_ai."));
 
   return (
-    <section
-      aria-label={`Attributes for ${span.name}`}
-      className="rounded border border-line bg-panel px-5 py-4"
-    >
+    <section aria-label={`Attributes for ${span.name}`}>
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="break-all font-mono text-[13px] font-semibold text-signal">{span.name}</h2>
+        <h2
+          ref={headingRef}
+          tabIndex={-1}
+          className="break-all font-mono text-[13px] font-semibold text-signal"
+        >
+          {span.name}
+        </h2>
         <button
           type="button"
           onClick={onClose}
@@ -247,8 +292,9 @@ function AttributeDrawer({ span, onClose }: { span: Span; onClose: () => void })
 }
 
 /**
- * Span waterfall for one run (Product_Scope §2 surface 2): the run header,
- * a replay-and-diff panel, and the span waterfall itself, driven by
+ * Span waterfall for one run (Product_Scope §2 surface 2): the run header, the
+ * span waterfall, and an inspector panel (span details, request/response,
+ * replay-and-diff) beside it from `lg` and below it on a phone, driven by
  * GET /runs/{id}/spans (Tech_Scope §4).
  */
 export function RunWaterfallPage() {
@@ -259,6 +305,50 @@ export function RunWaterfallPage() {
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [selectedSpan, setSelectedSpan] = useState<Span | null>(null);
+  const [activeTab, setActiveTab] = useState<InspectorTab>("replay");
+  const inspectorRef = useRef<HTMLElement>(null);
+  const spanHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  // Picking a span opens its details in the inspector. When the inspector sits
+  // below the waterfall (under `xl`) it may be off screen, so scroll it into
+  // view and move focus to its heading. Beside the waterfall it is already
+  // visible, so focus stays on the row and arrow/tab navigation keeps its place.
+  const selectedSpanId = selectedSpan?.span_id;
+  useEffect(() => {
+    if (!selectedSpanId) return;
+    const stacked = !window.matchMedia?.("(min-width: 1280px)").matches;
+    inspectorRef.current?.scrollIntoView?.({ block: "nearest" });
+    if (stacked) spanHeadingRef.current?.focus({ preventScroll: true });
+  }, [selectedSpanId]);
+
+  // Escape closes the span details and hands focus back to the row.
+  useEffect(() => {
+    if (!selectedSpanId) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && target.matches("select, input, textarea")) return;
+      setSelectedSpan(null);
+      document
+        .querySelector<HTMLElement>(`[data-span-id="${CSS.escape(selectedSpanId as string)}"]`)
+        ?.focus();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [selectedSpanId]);
+
+  function selectSpan(span: Span) {
+    setSelectedSpan(span);
+    setActiveTab("span");
+  }
+
+  function closeSpan() {
+    const id = selectedSpan?.span_id;
+    setSelectedSpan(null);
+    if (id) {
+      document.querySelector<HTMLElement>(`[data-span-id="${CSS.escape(id)}"]`)?.focus();
+    }
+  }
 
   const load = useCallback(() => {
     if (!runId) return;
@@ -266,6 +356,7 @@ export function RunWaterfallPage() {
     setError(null);
     setNotFound(false);
     setSelectedSpan(null);
+    setActiveTab("replay");
     getRunSpans(runId)
       .then(setData)
       .catch((err: unknown) => {
@@ -305,36 +396,50 @@ export function RunWaterfallPage() {
     <div className="flex flex-col gap-6">
       <RunHeader run={run} />
 
-      <ReplayPanel sourceRunId={run.run_id} sourceRun={run} />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem] xl:items-start">
+        <section aria-label="Span waterfall" className="min-w-0 rounded border border-line bg-panel px-5 py-4">
+          <h2 className="mb-3 text-base font-semibold text-signal">Waterfall</h2>
 
-      <section aria-label="Span waterfall" className="rounded border border-line bg-panel px-5 py-4">
-        <h2 className="mb-3 text-base font-semibold text-signal">Waterfall</h2>
+          {spans.length === 0 ? (
+            <EmptyState message="This run has no recorded spans." />
+          ) : (
+            <>
+              <TimeAxis totalRangeMs={totalRangeMs} />
+              <div role="list" aria-label="Spans" className="mt-2 flex flex-col gap-0.5">
+                {nodes.map((node) => (
+                  <div role="listitem" key={node.span.span_id}>
+                    <SpanRow
+                      node={node}
+                      minStart={minStart}
+                      totalRange={totalRange}
+                      isSelected={selectedSpan?.span_id === node.span.span_id}
+                      onSelect={selectSpan}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </section>
 
-        {spans.length === 0 ? (
-          <EmptyState message="This run has no recorded spans." />
-        ) : (
-          <>
-            <TimeAxis totalRangeMs={totalRangeMs} />
-            <div role="list" aria-label="Spans" className="mt-2 flex flex-col gap-0.5">
-              {nodes.map((node) => (
-                <div role="listitem" key={node.span.span_id}>
-                  <SpanRow
-                    node={node}
-                    minStart={minStart}
-                    totalRange={totalRange}
-                    isSelected={selectedSpan?.span_id === node.span.span_id}
-                    onSelect={setSelectedSpan}
-                  />
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </section>
-
-      {selectedSpan && (
-        <AttributeDrawer span={selectedSpan} onClose={() => setSelectedSpan(null)} />
-      )}
+        <RunInspector
+          active={activeTab}
+          onChange={setActiveTab}
+          panelRef={inspectorRef}
+          span={
+            selectedSpan ? (
+              <AttributeDrawer span={selectedSpan} onClose={closeSpan} headingRef={spanHeadingRef} />
+            ) : (
+              <>
+                <h2 className="mb-1 text-base font-semibold text-signal">Span details</h2>
+                <p className="text-fog">Select a span in the waterfall to see its attributes.</p>
+              </>
+            )
+          }
+          request={<RequestResponse run={run} />}
+          replay={<ReplayPanel sourceRunId={run.run_id} sourceRun={run} embedded />}
+        />
+      </div>
     </div>
   );
 }

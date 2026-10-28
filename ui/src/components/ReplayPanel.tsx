@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { describeApiError, getRunSpans, postReplay } from "../api/client";
 import type { DiffSummary, Run, Tier } from "../api/types";
@@ -52,9 +52,29 @@ function DiffField({
  * with the tier forced -- it is never presented as a correction of the
  * original run, only as a new, separate run to compare against it.
  */
-export function ReplayPanel({ sourceRunId, sourceRun }: { sourceRunId: string; sourceRun: Run }) {
+export function ReplayPanel({
+  sourceRunId,
+  sourceRun,
+  embedded = false,
+}: {
+  sourceRunId: string;
+  sourceRun: Run;
+  /** Inside the run inspector, which already is the card: drop this one's own border and padding. */
+  embedded?: boolean;
+}) {
   const [tier, setTier] = useState<Tier>("sonnet");
   const [state, setState] = useState<ReplayState>({ status: "idle" });
+  const resultHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  // A finished replay can land below the fold (always on a phone): bring it
+  // into view and move focus to it so keyboard and screen-reader users land on it.
+  useEffect(() => {
+    if (state.status !== "success") return;
+    const heading = resultHeadingRef.current;
+    if (!heading) return;
+    heading.scrollIntoView?.({ block: "nearest" });
+    heading.focus({ preventScroll: true });
+  }, [state.status]);
 
   function runReplay() {
     setState({ status: "loading", tier });
@@ -79,7 +99,7 @@ export function ReplayPanel({ sourceRunId, sourceRun }: { sourceRunId: string; s
   return (
     <section
       aria-label="Replay with a forced tier"
-      className="rounded border border-line bg-panel px-5 py-4"
+      className={embedded ? "" : "rounded border border-line bg-panel px-5 py-4"}
     >
       <h2 className="mb-1 text-base font-semibold text-signal">Replay with a forced tier</h2>
       <p className="mb-3 text-fog">Pick a past run and a tier to force, then compare.</p>
@@ -111,15 +131,30 @@ export function ReplayPanel({ sourceRunId, sourceRun }: { sourceRunId: string; s
       </div>
 
       {state.status === "loading" && (
-        <p className="mt-3 text-fog">Replaying against {TIER_LABEL[state.tier]}…</p>
+        <p role="status" className="mt-3 flex items-center gap-2 text-fog">
+          <span
+            aria-hidden="true"
+            className="h-3 w-3 shrink-0 animate-pulse rounded-full bg-fog motion-reduce:animate-none"
+          />
+          Replaying against {TIER_LABEL[state.tier]}…
+        </p>
       )}
 
       {state.status === "error" && (
-        <p className="mt-3 text-tier-opus">Replay failed: {state.message}</p>
+        <p role="alert" className="mt-3 text-tier-opus">
+          Replay failed: {state.message}
+        </p>
       )}
 
       {state.status === "success" && (
         <div className="mt-4 flex flex-col gap-2 border-t border-line pt-4">
+          <h3
+            ref={resultHeadingRef}
+            tabIndex={-1}
+            className="text-sm font-semibold text-signal"
+          >
+            Replay result
+          </h3>
           <DiffField
             label="Tier"
             before={sourceRun.tier_chosen}

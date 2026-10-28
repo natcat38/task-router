@@ -76,6 +76,8 @@ describe("ReplayPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Replay" }));
 
     expect(await screen.findByText(/Replaying against opus/)).toBeInTheDocument();
+    // TR-UX-10: the wait is announced, not just a static grey line.
+    expect(screen.getByRole("status")).toHaveTextContent(/Replaying against opus/);
 
     resolvePost?.({
       ok: true,
@@ -103,6 +105,9 @@ describe("ReplayPanel", () => {
 
     // Non-deterministic / separate-run note per ADR 0002.
     expect(screen.getByText(/does not correct or overwrite the original/)).toBeInTheDocument();
+
+    // TR-UX-10: focus lands on the result so it isn't left below the fold.
+    expect(screen.getByRole("heading", { name: "Replay result" })).toHaveFocus();
 
     const link = screen.getByRole("link", { name: /View new run/ });
     expect(link).toHaveAttribute("href", "/runs/new-run-2");
