@@ -36,8 +36,10 @@ export class ApiError extends Error {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
+    // Only a request with a body needs Content-Type. Sending it on a GET makes the
+    // browser run a CORS preflight (an extra OPTIONS round trip) before every read.
     response = await fetch(`${API_BASE}${path}`, {
-      headers: { "Content-Type": "application/json" },
+      ...(init?.body ? { headers: { "Content-Type": "application/json" } } : {}),
       ...init,
     });
   } catch {

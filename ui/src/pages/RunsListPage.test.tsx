@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter, RouterProvider, createMemoryRouter } from "react-router-dom";
 import { RunsListPage } from "./RunsListPage";
 import type { Run, RunsListResponse } from "../api/types";
 
@@ -143,5 +143,114 @@ describe("RunsListPage", () => {
     );
 
     expect(await screen.findByText(/Couldn't reach the router API/)).toBeInTheDocument();
+  });
+
+  // TR-UX-3: the list says what each request was.
+  it("shows the request text in each row, with the full text in the tooltip, and the whole row opens the run", async () => {
+    const long = "Summarise this incident report for the on-call channel. ".repeat(10);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => makeResponse({ data: [makeRun({ run_id: "run-1", input_text: long })] }),
+    });
+    const router = createMemoryRouter(
+      [
+        { path: "/", element: <RunsListPage /> },
+        { path: "/runs/:runId", element: <p>run page</p> },
+      ],
+      { initialEntries: ["/"] },
+    );
+    render(<RouterProvider router={router} />);
+
+    const link = (await screen.findAllByRole("link", { name: /Summarise this incident report/ }))[0];
+    expect(link).toHaveAttribute("title", long);
+    expect(link.textContent?.length).toBeLessThanOrEqual(81);
+    expect(link).toHaveAttribute("href", "/runs/run-1");
+
+    fireEvent.click(link.closest("tr") as HTMLElement);
+    await waitFor(() => expect(router.state.location.pathname).toBe("/runs/run-1"));
+  });
+
+  // TR-UX-6
+  it("says no runs match, and offers Clear filters, when a filter hides every run", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => makeResponse({ data: [], pagination: { page: 1, page_size: 20, total_items: 0, total_pages: 0 } }),
+    });
+    const router = createMemoryRouter([{ path: "/", element: <RunsListPage /> }], {
+      initialEntries: ["/?tier=opus&status=error"],
+    });
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByText("No runs match these filters.")).toBeInTheDocument();
+    expect(screen.queryByText(/No runs yet/)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+    await waitFor(() => expect(router.state.location.search).toBe(""));
+  });
+
+  // TR-UX-7
+  it("waits for a pause in typing, makes one request, and replaces the history entry", async () => {
+    fetchMock.mockResolvedValue({ ok: true, json: async () => makeResponse() });
+    const router = createMemoryRouter([{ path: "/", element: <RunsListPage /> }], { initialEntries: ["/"] });
+    render(<RouterProvider router={router} />);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    const input = screen.getByLabelText("Use case");
+    for (const value of ["s", "su", "sum", "summ"]) {
+      fireEvent.change(input, { target: { value } });
+    }
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(router.state.location.search).toBe("");
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(String(fetchMock.mock.calls[1][0])).toContain("use_case=summ");
+    expect(router.state.historyAction).toBe("REPLACE");
+  });
+
+  it("ignores a slow earlier response that arrives after a newer one", async () => {
+    let resolveFirst: ((value: unknown) => void) | undefined;
+    fetchMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveFirst = resolve;
+        }),
+    );
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => makeResponse({ data: [makeRun({ run_id: "new", use_case: "newer-result" })] }),
+    });
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <RunsListPage />
+      </MemoryRouter>,
+    );
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    fireEvent.change(screen.getByLabelText("Tier"), { target: { value: "sonnet" } });
+    expect((await screen.findAllByText("newer-result")).length).toBeGreaterThan(0);
+
+    await act(async () => {
+      resolveFirst?.({
+        ok: true,
+        json: async () => makeResponse({ data: [makeRun({ run_id: "old", use_case: "stale-result" })] }),
+      });
+    });
+    expect(screen.queryByText("stale-result")).not.toBeInTheDocument();
+    expect(screen.getAllByText("newer-result").length).toBeGreaterThan(0);
+  });
+
+  // TR-UX-4
+  it("counts active filters on the phone Filters button", async () => {
+    fetchMock.mockResolvedValue({ ok: true, json: async () => makeResponse() });
+    render(
+      <MemoryRouter initialEntries={["/?tier=opus&status=error"]}>
+        <RunsListPage />
+      </MemoryRouter>,
+    );
+
+    const button = await screen.findByRole("button", { name: "Filters (2)" });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "true");
   });
 });

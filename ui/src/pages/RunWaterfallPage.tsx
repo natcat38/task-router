@@ -10,6 +10,7 @@ import { RequestResponse, RunInspector, inspectorPanelId } from "../components/R
 import type { InspectorTab } from "../components/RunInspector";
 import { StatusChip } from "../components/StatusChip";
 import { Timestamp } from "../components/Timestamp";
+import { useDocumentTitle } from "../lib/useDocumentTitle";
 import { EmptyState, ErrorState, LoadingState } from "../components/StatusStates";
 
 /** A span plus its nesting depth, in the preorder the waterfall renders it. */
@@ -299,6 +300,7 @@ function AttributeDrawer({
  */
 export function RunWaterfallPage() {
   const { runId } = useParams<{ runId: string }>();
+  useDocumentTitle(`Run ${runId?.slice(0, 8) ?? ""}`.trim());
 
   const [data, setData] = useState<RunSpansResponse | null>(null);
   const [loading, setLoading] = useState(true);

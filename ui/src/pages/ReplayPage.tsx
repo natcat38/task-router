@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ApiError, describeApiError, getRunSpans } from "../api/client";
 import type { Run } from "../api/types";
+import { useDocumentTitle } from "../lib/useDocumentTitle";
 import { ReplayPanel } from "../components/ReplayPanel";
 import { EmptyState, ErrorState, LoadingState } from "../components/StatusStates";
 
@@ -14,6 +15,7 @@ import { EmptyState, ErrorState, LoadingState } from "../components/StatusStates
  */
 export function ReplayPage() {
   const { runId } = useParams<{ runId: string }>();
+  useDocumentTitle(`Replay ${runId?.slice(0, 8) ?? ""}`.trim());
 
   const [run, setRun] = useState<Run | null>(null);
   const [loading, setLoading] = useState(true);
