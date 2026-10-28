@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             aria-expanded={mobileNavOpen}
             aria-controls="mobile-nav"
             onClick={() => setMobileNavOpen((open) => !open)}
-            className="rounded border border-line px-3 py-1.5 text-sm transition-standard hover:border-signal"
+            className="min-h-11 rounded border border-control-line px-3 py-1.5 text-sm transition-standard hover:border-signal md:min-h-0"
           >
             {mobileNavOpen ? "Close" : "Menu"}
           </button>

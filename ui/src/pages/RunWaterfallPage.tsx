@@ -203,7 +203,7 @@ function SpanRow({
       onClick={() => onSelect(span)}
       aria-expanded={isSelected}
       aria-controls={inspectorPanelId("span")}
-      className={`${ROW_LAYOUT} rounded py-1 text-left transition-standard hover:bg-ink ${
+      className={`${ROW_LAYOUT} min-h-11 rounded py-1 text-left transition-standard hover:bg-ink md:min-h-0 ${
         isSelected ? "bg-ink" : ""
       }`}
     >
@@ -258,7 +258,7 @@ function AttributeDrawer({
         <button
           type="button"
           onClick={onClose}
-          className="shrink-0 rounded border border-line px-2 py-1 font-mono text-[11px] transition-standard hover:border-signal"
+          className="min-h-11 min-w-11 shrink-0 rounded border border-control-line px-2 py-1 font-mono text-[11px] transition-standard hover:border-signal md:min-h-0 md:min-w-0"
         >
           Close
         </button>

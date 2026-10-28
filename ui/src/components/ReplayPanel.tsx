@@ -19,6 +19,13 @@ type ReplayState =
   | { status: "success"; diff: DiffSummary; newRunId: string; newRun: Run | null }
   | { status: "error"; message: string };
 
+/**
+ * One before/after row of the replay diff. It is a container-query layout, not a
+ * viewport one: in a narrow space (a phone, or the run page's side panel) Before
+ * and After stack as two labelled lines, because four columns left each value
+ * about 8 characters wide. Wide enough, it is the compact four-column row.
+ * A changed row says so in text and with an arrow, never by colour alone.
+ */
 function DiffField({
   label,
   before,
@@ -31,14 +38,63 @@ function DiffField({
   changed: boolean;
 }) {
   return (
-    <div className="grid grid-cols-[6rem_1fr_auto_1fr] items-baseline gap-2 font-mono text-[13px]">
-      <span className="text-fog">{label}</span>
-      <span className="break-all text-signal">{before}</span>
-      <span aria-hidden="true" className="text-fog">
-        →
-      </span>
-      <span className={`break-all ${changed ? "text-tier-sonnet" : "text-signal"}`}>{after}</span>
+    <div className="@container">
+      <div className="flex flex-col gap-0.5 font-mono text-[13px] @md:grid @md:grid-cols-[6rem_1fr_auto_1fr] @md:items-baseline @md:gap-2">
+        <span className="text-fog">
+          {label}
+          {changed && (
+            <span aria-hidden="true" className="@md:hidden">
+              {" "}
+              (changed)
+            </span>
+          )}
+          <span className="sr-only">{changed ? " changed" : " unchanged"}</span>
+        </span>
+        <span className="flex gap-2 break-words">
+          <span className="w-14 shrink-0 text-fog @md:hidden">Before</span>
+          <span className="min-w-0 break-words text-signal">{before}</span>
+        </span>
+        <span aria-hidden="true" className="hidden text-fog @md:inline">
+          {changed ? "→" : "="}
+        </span>
+        <span className="flex gap-2">
+          <span className="w-14 shrink-0 text-fog @md:hidden">After</span>
+          <span className={`min-w-0 break-words ${changed ? "text-tier-sonnet" : "text-signal"}`}>
+            {changed && (
+              <span aria-hidden="true" className="@md:hidden">
+                →{" "}
+              </span>
+            )}
+            {after}
+          </span>
+        </span>
+      </div>
     </div>
+  );
+}
+
+/** Both outputs in full, behind a disclosure, each in its own scrollable block. */
+function FullOutput({ before, after }: { before: string | null; after: string | null }) {
+  if (before === null && after === null) return null;
+  return (
+    <details className="group mt-1">
+      <summary className="min-h-11 cursor-pointer py-2 font-mono text-[13px] text-signal underline decoration-line hover:decoration-signal md:min-h-0 md:py-1">
+        Show full output
+      </summary>
+      <div className="mt-2 flex flex-col gap-3">
+        {[
+          { title: "Before (original run)", text: before },
+          { title: "After (replay)", text: after },
+        ].map(({ title, text }) => (
+          <div key={title}>
+            <h4 className="mb-1 text-xs text-fog">{title}</h4>
+            <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-words rounded bg-ink px-3 py-2 font-mono text-[13px] text-signal">
+              {text ?? "-"}
+            </pre>
+          </div>
+        ))}
+      </div>
+    </details>
   );
 }
 
@@ -111,7 +167,7 @@ export function ReplayPanel({
             value={tier}
             onChange={(event) => setTier(event.target.value as Tier)}
             disabled={isLoading}
-            className="rounded border border-line bg-ink px-2 py-1.5 text-sm text-signal"
+            className="min-h-11 rounded border border-control-line bg-ink px-2 py-1.5 text-base text-signal md:min-h-0 md:text-sm"
           >
             {TIER_ORDER.map((t) => (
               <option key={t} value={t}>
@@ -124,7 +180,7 @@ export function ReplayPanel({
           type="button"
           onClick={runReplay}
           disabled={isLoading}
-          className="rounded border border-line px-3 py-1.5 text-sm transition-standard hover:border-signal disabled:cursor-not-allowed disabled:opacity-40"
+          className="min-h-11 rounded border border-signal bg-signal px-4 py-1.5 text-sm font-medium text-ink transition-standard hover:bg-fog hover:border-fog disabled:cursor-not-allowed disabled:opacity-40 md:min-h-0"
         >
           Replay
         </button>
@@ -183,6 +239,7 @@ export function ReplayPanel({
             after={truncate(state.newRun?.output_text ?? null)}
             changed={state.diff.output_changed}
           />
+          <FullOutput before={sourceRun.output_text} after={state.newRun?.output_text ?? null} />
 
           <p className="mt-2 max-w-prose text-xs text-fog">
             This replay re-ran the whole router pipeline with the tier forced and produced a new,

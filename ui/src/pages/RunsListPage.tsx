@@ -118,7 +118,7 @@ export function RunsListPage() {
           aria-expanded={filtersOpen}
           aria-controls="run-filters"
           onClick={() => setFiltersOpen((open) => !open)}
-          className="min-h-11 rounded border border-line px-3 py-1.5 text-sm transition-standard hover:border-signal sm:hidden"
+          className="min-h-11 rounded border border-control-line px-3 py-1.5 text-sm transition-standard hover:border-signal sm:hidden"
         >
           Filters{activeFilters > 0 ? ` (${activeFilters})` : ""}
         </button>
@@ -135,7 +135,7 @@ export function RunsListPage() {
           <select
             value={tierParam}
             onChange={(event) => setFilter("tier", event.target.value)}
-            className="rounded border border-line bg-panel px-2 py-1.5 text-sm text-signal"
+            className="min-h-11 rounded border border-control-line bg-panel px-2 py-1.5 text-base text-signal md:min-h-0 md:text-sm"
           >
             <option value="">All</option>
             {TIER_ORDER.map((tier) => (
@@ -153,7 +153,7 @@ export function RunsListPage() {
             value={useCaseInput}
             onChange={(event) => setUseCaseInput(event.target.value)}
             placeholder="any"
-            className="rounded border border-line bg-panel px-2 py-1.5 text-sm text-signal placeholder:text-fog"
+            className="min-h-11 rounded border border-control-line bg-panel px-2 py-1.5 text-base text-signal placeholder:text-fog md:min-h-0 md:text-sm"
           />
         </label>
 
@@ -162,7 +162,7 @@ export function RunsListPage() {
           <select
             value={statusParam}
             onChange={(event) => setFilter("status", event.target.value)}
-            className="rounded border border-line bg-panel px-2 py-1.5 text-sm text-signal"
+            className="min-h-11 rounded border border-control-line bg-panel px-2 py-1.5 text-base text-signal md:min-h-0 md:text-sm"
           >
             <option value="">All</option>
             {STATUS_OPTIONS.map((status) => (
@@ -185,7 +185,7 @@ export function RunsListPage() {
             <button
               type="button"
               onClick={() => setSearchParams({})}
-              className="rounded border border-line px-3 py-1.5 font-mono text-[13px] text-signal transition-standard hover:border-signal"
+              className="min-h-11 rounded border border-control-line px-3 py-1.5 font-mono text-[13px] text-signal transition-standard hover:border-signal md:min-h-0"
             >
               Clear filters
             </button>
@@ -251,7 +251,7 @@ export function RunsListPage() {
                 type="button"
                 onClick={() => goToPage(page - 1)}
                 disabled={page <= 1}
-                className="rounded border border-line px-3 py-1.5 transition-standard hover:border-signal disabled:cursor-not-allowed disabled:opacity-40"
+                className="min-h-11 rounded border border-control-line px-3 py-1.5 transition-standard hover:border-signal disabled:cursor-not-allowed disabled:opacity-40 md:min-h-0"
               >
                 Prev
               </button>
@@ -262,7 +262,7 @@ export function RunsListPage() {
                 type="button"
                 onClick={() => goToPage(page + 1)}
                 disabled={page >= pagination.total_pages}
-                className="rounded border border-line px-3 py-1.5 transition-standard hover:border-signal disabled:cursor-not-allowed disabled:opacity-40"
+                className="min-h-11 rounded border border-control-line px-3 py-1.5 transition-standard hover:border-signal disabled:cursor-not-allowed disabled:opacity-40 md:min-h-0"
               >
                 Next
               </button>

@@ -182,9 +182,12 @@ describe("RunWaterfallPage", () => {
       const row = screen.getAllByRole("button", { name: /chat sonnet/ })[0];
       const spacers = Array.from(axis.children).filter((el) => el.tagName === "SPAN");
       const rowCols = Array.from(row.children);
-      expect(axis.className).toBe(row.className.split(" rounded")[0]);
-      expect(spacers[0].className).toBe(rowCols[0].className.replace(/ truncate.*/, ""));
-      expect(spacers[1].className).toBe(rowCols[2].className.replace(/ text-right.*/, ""));
+      const tokens = (el: Element) => el.className.split(/\s+/).filter(Boolean);
+      const sharedBy = (axisPart: Element, rowPart: Element) =>
+        tokens(axisPart).every((t) => tokens(rowPart).includes(t));
+      expect(sharedBy(axis, row)).toBe(true);
+      expect(sharedBy(spacers[0], rowCols[0])).toBe(true);
+      expect(sharedBy(spacers[1], rowCols[2])).toBe(true);
 
       const lastTick = screen.getByText("10ms");
       expect(lastTick).toHaveStyle({ left: "100%" });
