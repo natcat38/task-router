@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { TIER_ORDER } from "../api/tiers";
 import { TierChip } from "./TierChip";
 
@@ -52,33 +52,71 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const mobileBarRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const location = useLocation();
+
+  // Any route change closes the menu (back/forward included, not only taps on its own links).
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname, location.search]);
+
+  // While the menu is open: Escape closes it (focus returns to the button),
+  // and so does a tap anywhere outside the bar.
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setMobileNavOpen(false);
+      menuButtonRef.current?.focus();
+    }
+    function onPointerDown(event: PointerEvent) {
+      if (event.target instanceof Node && !mobileBarRef.current?.contains(event.target)) {
+        setMobileNavOpen(false);
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [mobileNavOpen]);
 
   return (
     <div className="min-h-full bg-ink text-signal md:flex">
-      {/* Mobile top bar (below md) */}
-      <header className="flex items-center justify-between border-b border-line px-4 py-3 md:hidden">
-        <span className="font-mono text-sm font-semibold">router</span>
-        <button
-          type="button"
-          aria-expanded={mobileNavOpen}
-          aria-controls="mobile-nav"
-          onClick={() => setMobileNavOpen((open) => !open)}
-          className="rounded border border-line px-3 py-1.5 text-sm transition-standard hover:border-signal"
-        >
-          {mobileNavOpen ? "Close" : "Menu"}
-        </button>
-      </header>
-      {mobileNavOpen && (
-        <div id="mobile-nav" className="border-b border-line px-4 py-4 md:hidden">
-          <NavLinks onNavigate={() => setMobileNavOpen(false)} />
-          <div className="mt-4">
-            <TierLegend />
+      {/* Mobile top bar (below md). Pinned, so the Menu stays in reach on a long list;
+          the open menu is inside the same pinned block so it scrolls with it. */}
+      <div ref={mobileBarRef} className="sticky top-0 z-20 bg-ink md:hidden">
+        <header className="flex items-center justify-between border-b border-line px-4 py-3">
+          <span className="font-mono text-sm font-semibold">router</span>
+          <button
+            ref={menuButtonRef}
+            type="button"
+            aria-expanded={mobileNavOpen}
+            aria-controls="mobile-nav"
+            onClick={() => setMobileNavOpen((open) => !open)}
+            className="rounded border border-line px-3 py-1.5 text-sm transition-standard hover:border-signal"
+          >
+            {mobileNavOpen ? "Close" : "Menu"}
+          </button>
+        </header>
+        {mobileNavOpen && (
+          <div
+            id="mobile-nav"
+            className="max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-line px-4 py-4"
+          >
+            <NavLinks onNavigate={() => setMobileNavOpen(false)} />
+            <div className="mt-4">
+              <TierLegend />
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Desktop nav rail (md and up) */}
-      <aside className="hidden w-56 shrink-0 flex-col justify-between border-r border-line px-3 py-4 md:flex">
+      {/* Desktop nav rail (md and up). Pinned for the full viewport height so Runs,
+          Stats and the tier legend stay on screen however long the page is. */}
+      <aside className="hidden w-56 shrink-0 flex-col justify-between self-start border-r border-line px-3 py-4 md:sticky md:top-0 md:flex md:h-dvh">
         <div>
           <div className="mb-4 px-3 font-mono text-sm font-semibold">router</div>
           <NavLinks />

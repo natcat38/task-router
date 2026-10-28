@@ -1,15 +1,19 @@
-import { useCallback, useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { describeApiError, getRuns } from "../api/client";
 import type { Run, RunStatus, RunsListResponse } from "../api/types";
 import { isTier, TIER_ORDER } from "../api/tiers";
 import { StatusChip } from "../components/StatusChip";
-import { Timestamp } from "../components/Timestamp";
+import { RelativeTimestamp, Timestamp } from "../components/Timestamp";
+import { requestSnippet } from "../lib/format";
+import { useDocumentTitle } from "../lib/useDocumentTitle";
 import { TierChip } from "../components/TierChip";
 import { EmptyState, ErrorState, LoadingState } from "../components/StatusStates";
 
 const PAGE_SIZE = 20;
 const STATUS_OPTIONS: RunStatus[] = ["ok", "error"];
+/** How long to wait after the last keystroke in "Use case" before filtering. */
+const USE_CASE_DEBOUNCE_MS = 300;
 
 function shortId(id: string): string {
   return id.length > 10 ? `${id.slice(0, 10)}…` : id;
@@ -22,17 +26,30 @@ function shortId(id: string): string {
  * how GET /runs itself is shaped around query params (Tech_Scope §4).
  */
 export function RunsListPage() {
+  useDocumentTitle("Runs");
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
   const tierParam = searchParams.get("tier") ?? "";
   const useCaseParam = searchParams.get("use_case") ?? "";
   const statusParam = searchParams.get("status") ?? "";
+  const activeFilters = [tierParam, useCaseParam, statusParam].filter(Boolean).length;
 
   const [data, setData] = useState<RunsListResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Under `sm` the three filters sit behind a "Filters (n)" button; from `sm` they are always shown.
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  // What is typed in "Use case", kept apart from the URL so typing doesn't fire a request
+  // and a history entry per keystroke.
+  const [useCaseInput, setUseCaseInput] = useState(useCaseParam);
+
+  // Only the newest request may update the page: a slow earlier response must not land
+  // after a newer one and show results for the wrong filters.
+  const latestRequest = useRef(0);
 
   const load = useCallback(() => {
+    const requestId = ++latestRequest.current;
+    const isLatest = () => requestId === latestRequest.current;
     setLoading(true);
     setError(null);
     getRuns({
@@ -42,16 +59,22 @@ export function RunsListPage() {
       use_case: useCaseParam || undefined,
       status: statusParam === "ok" || statusParam === "error" ? statusParam : undefined,
     })
-      .then(setData)
-      .catch((err: unknown) => setError(describeApiError(err)))
-      .finally(() => setLoading(false));
+      .then((res) => {
+        if (isLatest()) setData(res);
+      })
+      .catch((err: unknown) => {
+        if (isLatest()) setError(describeApiError(err));
+      })
+      .finally(() => {
+        if (isLatest()) setLoading(false);
+      });
   }, [page, tierParam, useCaseParam, statusParam]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  function setFilter(key: "tier" | "use_case" | "status", value: string) {
+  function setFilter(key: "tier" | "use_case" | "status", value: string, replace = false) {
     const next = new URLSearchParams(searchParams);
     if (value) {
       next.set(key, value);
@@ -60,8 +83,22 @@ export function RunsListPage() {
     }
     // Changing a filter invalidates the current page number.
     next.delete("page");
-    setSearchParams(next);
+    setSearchParams(next, { replace });
   }
+
+  // Back/forward or "Clear filters" changes the URL; mirror it into the text box.
+  useEffect(() => {
+    setUseCaseInput(useCaseParam);
+  }, [useCaseParam]);
+
+  // Apply the typed text 300 ms after the last keystroke. `replace` so a typed
+  // word is one history entry at most, not one per letter.
+  useEffect(() => {
+    if (useCaseInput.trim() === useCaseParam) return;
+    const timer = setTimeout(() => setFilter("use_case", useCaseInput.trim(), true), USE_CASE_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+    // setFilter closes over searchParams; re-running on every URL change would restart the timer.
+  }, [useCaseInput]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function goToPage(nextPage: number) {
     const next = new URLSearchParams(searchParams);
@@ -76,11 +113,21 @@ export function RunsListPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-[22px] font-semibold">Runs</h1>
+        <button
+          type="button"
+          aria-expanded={filtersOpen}
+          aria-controls="run-filters"
+          onClick={() => setFiltersOpen((open) => !open)}
+          className="min-h-11 rounded border border-line px-3 py-1.5 text-sm transition-standard hover:border-signal sm:hidden"
+        >
+          Filters{activeFilters > 0 ? ` (${activeFilters})` : ""}
+        </button>
       </div>
 
       <form
+        id="run-filters"
         aria-label="Filter runs"
-        className="flex flex-wrap items-end gap-3"
+        className={`${filtersOpen ? "flex" : "hidden"} flex-wrap items-end gap-3 sm:flex`}
         onSubmit={(event) => event.preventDefault()}
       >
         <label className="flex flex-col gap-1 text-xs text-fog">
@@ -103,8 +150,8 @@ export function RunsListPage() {
           Use case
           <input
             type="text"
-            value={useCaseParam}
-            onChange={(event) => setFilter("use_case", event.target.value)}
+            value={useCaseInput}
+            onChange={(event) => setUseCaseInput(event.target.value)}
             placeholder="any"
             className="rounded border border-line bg-panel px-2 py-1.5 text-sm text-signal placeholder:text-fog"
           />
@@ -131,7 +178,22 @@ export function RunsListPage() {
 
       {!loading && error && <ErrorState message={error} onRetry={load} />}
 
-      {!loading && !error && runs.length === 0 && (
+      {!loading && !error && runs.length === 0 && activeFilters > 0 && (
+        <EmptyState
+          message="No runs match these filters."
+          action={
+            <button
+              type="button"
+              onClick={() => setSearchParams({})}
+              className="rounded border border-line px-3 py-1.5 font-mono text-[13px] text-signal transition-standard hover:border-signal"
+            >
+              Clear filters
+            </button>
+          }
+        />
+      )}
+
+      {!loading && !error && runs.length === 0 && activeFilters === 0 && (
         <EmptyState message="No runs yet. Send a request to POST /v1/completions and it'll show up here." />
       )}
 
@@ -139,11 +201,11 @@ export function RunsListPage() {
         <>
           {/* Desktop / tablet: a real table, horizontal scroll only within its own container. */}
           <div className="hidden overflow-x-auto rounded border border-line sm:block">
-            <table className="w-full min-w-[720px] text-left text-sm">
+            <table className="w-full min-w-[860px] text-left text-sm">
               <thead className="border-b border-line text-xs text-fog">
                 <tr>
-                  <th scope="col" className="px-3 py-2 font-normal">
-                    Run
+                  <th scope="col" className="w-2/5 px-3 py-2 font-normal">
+                    Request
                   </th>
                   <th scope="col" className="px-3 py-2 font-normal">
                     Created
@@ -160,6 +222,9 @@ export function RunsListPage() {
                   <th scope="col" className="px-3 py-2 font-normal">
                     Status
                   </th>
+                  <th scope="col" className="px-3 py-2 font-normal">
+                    Run
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -171,7 +236,7 @@ export function RunsListPage() {
           </div>
 
           {/* Below sm: stacked key/value cards instead of a horizontally-scrolled table. */}
-          <ul className="flex flex-col gap-3 sm:hidden">
+          <ul className="flex flex-col gap-1.5 sm:hidden">
             {runs.map((run) => (
               <RunCard key={run.run_id} run={run} />
             ))}
@@ -218,17 +283,32 @@ function EscalatedBadge() {
 }
 
 function RunRow({ run }: { run: Run }) {
+  const navigate = useNavigate();
+  const href = `/runs/${encodeURIComponent(run.run_id)}`;
   return (
-    <tr className="border-b border-line last:border-b-0">
-      <td className="px-3 py-2 font-mono text-[13px]">
-        <Link to={`/runs/${encodeURIComponent(run.run_id)}`} className="text-signal underline decoration-line hover:decoration-signal">
-          {shortId(run.run_id)}
+    // The whole row opens the run. The request link inside it is the keyboard and
+    // screen-reader target; the click handler just widens the mouse target.
+    <tr
+      onClick={(event) => {
+        if (!(event.target as HTMLElement).closest("a")) navigate(href);
+      }}
+      className="cursor-pointer border-b border-line transition-standard last:border-b-0 hover:bg-panel"
+    >
+      <td className="max-w-0 px-3 py-2">
+        <Link
+          to={href}
+          title={run.input_text}
+          className="block truncate text-signal underline decoration-line hover:decoration-signal"
+        >
+          {requestSnippet(run.input_text)}
         </Link>
       </td>
-      <td className="px-3 py-2 font-mono text-[13px] text-fog">
+      <td className="whitespace-nowrap px-3 py-2 font-mono text-[13px] text-fog">
         <Timestamp iso={run.created_at} />
       </td>
-      <td className="px-3 py-2">{run.use_case ?? <span className="text-fog">-</span>}</td>
+      <td className="max-w-[12rem] truncate px-3 py-2" title={run.use_case ?? undefined}>
+        {run.use_case ?? <span className="text-fog">-</span>}
+      </td>
       <td className="px-3 py-2">
         <span className="inline-flex items-center gap-2">
           <TierChip tier={run.tier_chosen} />
@@ -239,39 +319,31 @@ function RunRow({ run }: { run: Run }) {
       <td className="px-3 py-2">
         <StatusChip status={run.status} />
       </td>
+      <td className="px-3 py-2 font-mono text-[13px] text-fog" title={run.run_id}>
+        {shortId(run.run_id)}
+      </td>
     </tr>
   );
 }
 
+/** Phone row: two lines, and the whole row is the link. Line 1 is what was asked,
+ * line 2 is how it went (tier, escalated, status, how long ago). */
 function RunCard({ run }: { run: Run }) {
   return (
-    <li className="rounded border border-line bg-panel px-4 py-3">
-      <div className="mb-2 flex items-center justify-between">
-        <Link
-          to={`/runs/${encodeURIComponent(run.run_id)}`}
-          className="font-mono text-[13px] text-signal underline decoration-line hover:decoration-signal"
-        >
-          {shortId(run.run_id)}
-        </Link>
-        <span className="inline-flex items-center gap-2">
+    <li>
+      <Link
+        to={`/runs/${encodeURIComponent(run.run_id)}`}
+        title={run.input_text}
+        className="flex min-h-14 flex-col justify-center gap-1 rounded border border-line bg-panel px-3 py-1.5 transition-standard hover:border-signal"
+      >
+        <span className="truncate text-signal">{requestSnippet(run.input_text)}</span>
+        <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <TierChip tier={run.tier_chosen} />
           {run.escalated && <EscalatedBadge />}
-        </span>
-      </div>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs text-fog">
-        <dt>Created</dt>
-        <dd className="font-mono text-signal">
-          <Timestamp iso={run.created_at} />
-        </dd>
-        <dt>Use case</dt>
-        <dd className="text-signal">{run.use_case ?? "-"}</dd>
-        <dt>Model</dt>
-        <dd className="font-mono text-signal">{run.model_used}</dd>
-        <dt>Status</dt>
-        <dd className="text-signal">
           <StatusChip status={run.status} />
-        </dd>
-      </dl>
+          <RelativeTimestamp iso={run.created_at} className="font-mono text-[13px] text-fog" />
+        </span>
+      </Link>
     </li>
   );
 }

@@ -20,10 +20,11 @@ export function LoadingState({ message }: { message: string }) {
   );
 }
 
-export function EmptyState({ message }: { message: string }) {
+export function EmptyState({ message, action }: { message: string; action?: ReactNode }) {
   return (
-    <div className="rounded border border-dashed border-line py-10 text-center text-fog">
-      {message}
+    <div className="rounded border border-dashed border-line px-4 py-10 text-center text-fog">
+      <p>{message}</p>
+      {action && <div className="mt-3">{action}</div>}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { describeApiError, getStats } from "../api/client";
 import type { StatsResponse } from "../api/types";
 import { TIER_COLOR, TIER_ORDER } from "../api/tiers";
+import { useDocumentTitle } from "../lib/useDocumentTitle";
 import { TierChip } from "../components/TierChip";
 import { EmptyState, ErrorState, LoadingState } from "../components/StatusStates";
 
@@ -26,6 +27,7 @@ function StatTile({ label, value, hint }: { label: string; value: string; hint: 
  * overstates the local tier's saving.
  */
 export function StatsPage() {
+  useDocumentTitle("Stats");
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
