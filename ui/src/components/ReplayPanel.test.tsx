@@ -109,6 +109,15 @@ describe("ReplayPanel", () => {
     // TR-UX-10: focus lands on the result so it isn't left below the fold.
     expect(screen.getByRole("heading", { name: "Replay result" })).toHaveFocus();
 
+    // TR-UX-9: a changed row says so in text and an arrow, not colour alone, and the
+    // full outputs are one click away instead of cut at 80 characters.
+    expect(screen.getAllByText(/\(changed\)/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("→").length).toBeGreaterThan(0);
+    const full = screen.getByText("Show full output");
+    fireEvent.click(full);
+    expect(screen.getByText("short summary", { selector: "pre" })).toBeInTheDocument();
+    expect(screen.getByText("much better summary", { selector: "pre" })).toBeInTheDocument();
+
     const link = screen.getByRole("link", { name: /View new run/ });
     expect(link).toHaveAttribute("href", "/runs/new-run-2");
   });

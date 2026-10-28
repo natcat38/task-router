@@ -10,6 +10,11 @@
   --ink: #0f1417;
   --panel: #161d22;
   --line: #2a343b;
+  /* Borders of interactive controls (inputs, selects, buttons). --line is only
+     1.46:1 against the page, which is fine for dividers but leaves controls
+     reading as floating text. #5d6d78 is 3.46:1 against --ink and 3.18:1
+     against --panel, clearing the 3:1 target for UI parts on both. */
+  --control-line: #5d6d78;
   --fog: #8a97a0;
   --signal: #e8edef;
 
@@ -27,6 +32,7 @@
   --color-ink: var(--ink);
   --color-panel: var(--panel);
   --color-line: var(--line);
+  --color-control-line: var(--control-line);
   --color-fog: var(--fog);
   --color-signal: var(--signal);
   --color-tier-local: var(--tier-local);

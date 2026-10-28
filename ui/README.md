@@ -11,6 +11,9 @@ npm install
 npm run dev
 ```
 
+The IBM Plex Sans and Mono faces are self-hosted through `@fontsource`
+(latin subset, weights 400/500/600), so the UI looks the same offline.
+
 By default the app talks to the router API at `http://localhost:8000`.
 Point it elsewhere by setting `VITE_API_BASE` (see `.env.example`).
 

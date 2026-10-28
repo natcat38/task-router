@@ -57,8 +57,6 @@ export function StatsPage() {
     return <EmptyState message="No completed runs yet — stats need at least one." />;
   }
 
-  const maxTierCount = Math.max(...TIER_ORDER.map((tier) => stats.by_tier[tier] ?? 0), 1);
-
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-[22px] font-semibold">Stats</h1>
@@ -88,7 +86,8 @@ export function StatsPage() {
           {TIER_ORDER.map((tier) => {
             const count = stats.by_tier[tier] ?? 0;
             const share = stats.n_requests > 0 ? (count / stats.n_requests) * 100 : 0;
-            const barWidth = count > 0 ? Math.max((count / maxTierCount) * 100, 2) : 0;
+            // Bar length is the share of all requests, the same number printed beside it.
+            const barWidth = count > 0 ? Math.max(share, 2) : 0;
             return (
               <div key={tier} className="flex items-center gap-3">
                 <div className="w-20 shrink-0">
@@ -96,6 +95,7 @@ export function StatsPage() {
                 </div>
                 <div className="h-3 flex-1 overflow-hidden rounded-full bg-ink">
                   <div
+                    data-testid="tier-bar"
                     className="h-full rounded-full motion-safe:transition-standard"
                     style={{ width: `${barWidth}%`, backgroundColor: TIER_COLOR[tier] }}
                   />

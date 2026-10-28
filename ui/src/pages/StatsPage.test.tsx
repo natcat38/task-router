@@ -50,6 +50,22 @@ describe("StatsPage", () => {
     expect(screen.getByText(/5 \(5%\)/)).toBeInTheDocument();
   });
 
+  // TR-UX-16: a bar's length is the share printed beside it (70 / 25 / 5 %), not
+  // relative to the biggest tier, so a 25% bar is no longer drawn at 36% length.
+  it("draws each tier bar at its share of all requests", async () => {
+    fetchMock.mockResolvedValue({ ok: true, json: async () => makeStats() });
+
+    render(
+      <MemoryRouter>
+        <StatsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText("82.4%");
+    const widths = screen.getAllByTestId("tier-bar").map((bar) => bar.style.width);
+    expect(widths).toEqual(["70%", "25%", "5%"]);
+  });
+
   it("shows the empty-state copy when there are no completed runs", async () => {
     fetchMock.mockResolvedValue({
       ok: true,

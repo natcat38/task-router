@@ -43,7 +43,7 @@ export function ErrorState({
         <button
           type="button"
           onClick={onRetry}
-          className="rounded border border-line px-3 py-1.5 font-mono text-[13px] transition-standard hover:border-signal"
+          className="min-h-11 rounded border border-control-line px-3 py-1.5 font-mono text-[13px] transition-standard hover:border-signal md:min-h-0"
         >
           Retry
         </button>

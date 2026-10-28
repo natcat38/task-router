@@ -84,7 +84,7 @@ export function RunInspector({
               aria-controls={inspectorPanelId(tab.id)}
               tabIndex={selected ? 0 : -1}
               onClick={() => onChange(tab.id)}
-              className={`-mb-px border-b-2 px-3 py-2.5 text-sm transition-standard ${
+              className={`-mb-px min-h-11 border-b-2 px-3 py-2.5 text-sm transition-standard md:min-h-0 ${
                 selected
                   ? "border-signal text-signal"
                   : "border-transparent text-fog hover:text-signal"
