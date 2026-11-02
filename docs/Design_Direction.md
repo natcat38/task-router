@@ -58,6 +58,9 @@ Type scale (Plex Sans unless noted): page title 22px/600, section heading
 16px/600, body 14px/400, Plex Mono data 13px/500 with slightly increased
 letter-spacing (0.01em) for scanability in tables.
 
+Both families are self-hosted through `@fontsource` (imported in
+`ui/src/main.tsx`), so the UI renders in Plex with no network (ADR 0004).
+
 ## Layout concept
 
 A left nav rail, not a top nav bar — trace viewers are read top-to-bottom
@@ -85,9 +88,13 @@ a shared horizontal time axis (ticked in `--line`, labelled in Plex Mono),
 each bar filled in its tier color — this *is* the oscilloscope-trace
 feeling: parallel signals against one shared clock.
 
-Below 768px the rail collapses to a slim icon-only strip; below 375px it
-becomes a top bar with a menu toggle, content goes full width, and tables
-switch to stacked key/value rows instead of horizontal scroll.
+From `xl` (1280px) the run page is two columns: the waterfall, and beside it
+a sticky inspector (span details, request and response, replay form). Below
+`xl` the inspector stacks under the waterfall (ADR 0004).
+
+Below 768px the rail gives way to a compact top bar with a Menu button that
+stays pinned while the page scrolls; content goes full width, and tables
+switch to stacked key/value rows instead of horizontal scroll (ADR 0004).
 
 ## Loading / empty / error states
 
