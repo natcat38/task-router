@@ -42,8 +42,10 @@ runs/
 # Trained classifier artifacts (regenerable via train.py, not committed)
 models/
 
-# Research notes — intentionally kept local, never committed
-docs/research/
+# Research notes: only docs/research/otel-replay-options.md is committed.
+# The other notes stay local (they hold account and plan details).
+docs/research/*
+!docs/research/otel-replay-options.md
 
 # Node / React (S6 UI)
 node_modules/

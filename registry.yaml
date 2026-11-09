@@ -1,7 +1,7 @@
 # Model registry for task-router providers (Tech_Scope.md §2).
 #
-# Prices are API list prices, taken from claude.com/pricing research
-# (docs/research/claude-p-backend.md §5) -- calls actually made through
+# Prices are API list prices, taken from claude.com/pricing (2026-09) --
+# calls actually made through
 # `claude -p` run on the Max subscription and never get billed at these
 # rates (Product_Scope §4 / §6 D10). Every cost figure computed from this
 # file must say so next to the number.

@@ -3,8 +3,7 @@
 Runs train's fit/eval helpers against a small SYNTHETIC labelled fixture
 built here, never against the real data/prompts.json -- that file is 200
 drafted rows with tier: null until the operator hand-labels it, and running
-metrics code over it would be exactly the silent corruption REFUTATIONS
-Minor #20 warns about. This suite proves the *logic* (filtering, fitting,
+metrics code over it would be exactly the silent corruption this guards against. This suite proves the *logic* (filtering, fitting,
 metric shapes), not any accuracy claim about the real data.
 """
 

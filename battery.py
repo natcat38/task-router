@@ -21,7 +21,7 @@ either (a) already in api.py/judge.py, exercised through its real HTTP
 surface, or (b) genuinely new to the battery -- resumable checkpointing and
 retry/backoff -- and nothing else.
 
-Resumable & paced (claude-p-backend.md §2/§5): Max plan usage resets on a
+Resumable & paced: Max plan usage resets on a
 rolling 5-hour window (~225 messages/5h on Max 5x is the binding
 constraint, not token cost), so a battery of ~120-150 real calls plus an
 Opus-judge step (near-doubling the call count) is expected to span >=2
@@ -34,17 +34,19 @@ that LOOKS like a usage/rate limit (see `is_usage_limit_error`) gets a
 bounded exponential backoff-and-retry inside a single prompt's attempt, and
 a prompt that still fails after that is recorded under
 `progress["failed"]` and the run moves on to the next prompt rather than
-crashing (claude-p-backend.md §5).
+crashing.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import tempfile
 import time
 from pathlib import Path
 from typing import Callable, Optional
 
+import yaml
 from fastapi.testclient import TestClient
 
 import train
@@ -69,7 +71,7 @@ DEFAULT_BACKOFF_BASE_S = 30.0
 # Heuristic, not a structured field: providers.py's claude_cli/ollama paths
 # both surface a failure as a plain `error` string (exit code + stderr, or a
 # transport exception), not the CLI's own JSON `subtype`
-# (`error_max_budget_usd` etc, claude-p-backend.md §1) -- so this matches on
+# (`error_max_budget_usd` etc) -- so this matches on
 # the kind of wording Anthropic's support/CLI docs use for an
 # exhausted-usage response. A false positive just costs a few retries before
 # giving up anyway; a false negative just skips straight to "record and
@@ -216,6 +218,7 @@ def run_battery(
     routing_config_path: Optional[Path] = None,
     send_fn: Optional[Callable[[str, str], dict]] = None,
     select_tier_fn=None,
+    judge_sample_rate: float = 1.0,
     max_retries: int = DEFAULT_MAX_RETRIES,
     backoff_base_s: float = DEFAULT_BACKOFF_BASE_S,
     sleep_fn: Callable[[float], None] = time.sleep,
@@ -223,8 +226,8 @@ def run_battery(
 ) -> dict:
     """Run the labelled-prompt battery once, skipping any prompt id already
     recorded under `progress["completed"]` (resumable across an
-    interruption or a usage cap, and across >=2 five-hour windows --
-    claude-p-backend.md §5). Returns the final progress dict.
+    interruption or a usage cap, and across >=2 five-hour windows).
+    Returns the final progress dict.
 
     `send_fn` defaults to the real `providers.send` (wrapped with retry) --
     pass a fake for tests/dry-run. `select_tier_fn` defaults to the real
@@ -232,10 +235,11 @@ def run_battery(
     default, exactly as a live request would route.
 
     ADR 0001 / Tech_Scope §2 call for `judge_sample_rate: 1.0` during the
-    battery. This function does not silently rewrite the operator's
-    routing.yaml to force that -- it only warns if the loaded config's rate
-    isn't 1.0, since routing.yaml is a live, operator-editable file
-    (Tech_Scope §4) and a surprise overwrite is worse than a warning here.
+    battery, while routing.yaml ships 0.2 for normal use. The battery sets
+    `judge_sample_rate` itself (default 1.0): it runs against a temporary
+    copy of the routing config with that rate applied, so the operator's
+    routing.yaml is never rewritten and the battery never depends on
+    whatever rate the file happens to hold.
 
     Never raises: a prompt that still fails after `with_retry`'s bounded
     retries is recorded under `progress["failed"]` and the loop continues.
@@ -243,18 +247,13 @@ def run_battery(
     rows = load_labelled_rows(prompts_path)
     progress = load_progress(progress_path)
 
-    try:
-        config = routing_config_module.load_config(routing_config_path)
-        sample_rate = config.get("judge_sample_rate", 0.0)
-        if sample_rate != 1.0:
-            print_fn(
-                f"WARNING: judge_sample_rate is {sample_rate}, not 1.0 -- ADR 0001 calls "
-                "for 1.0 during the battery so every routed answer is checked while the "
-                "classifier is unproven. Continuing anyway; routing.yaml is not being "
-                "rewritten automatically."
-            )
-    except FileNotFoundError:
-        pass
+    effective_config_dir = tempfile.TemporaryDirectory(prefix="battery-routing-")
+    effective_config_path = Path(effective_config_dir.name) / "routing.yaml"
+    config = routing_config_module.load_config(routing_config_path)
+    config["judge_sample_rate"] = judge_sample_rate
+    with effective_config_path.open("w", encoding="utf-8") as f:
+        yaml.safe_dump(config, f, sort_keys=False)
+    routing_config_path = effective_config_path
 
     base_send = send_fn or default_send
     retrying_send = with_retry(
@@ -323,6 +322,7 @@ def run_battery(
         save_progress(progress_path, progress)
 
     print_fn(format_summary(compute_summary(client, progress)))
+    effective_config_dir.cleanup()
     return progress
 
 

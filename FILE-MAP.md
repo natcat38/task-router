@@ -10,8 +10,10 @@ top-level source directory.
 | `docs` | Product and tech scope docs (`Product_Scope.md`, `Tech_Scope.md`) that are the source of truth for what this router does and how it is built. |
 | `docs/adr` | Architecture decision records, one per non-obvious design call (judge tier, replay semantics, provider auth). |
 | `docs/img` | Real screenshots embedded in `README.md`: the UI (runs list, run waterfall, stats) and a Jaeger trace waterfall. |
-| `docs/review` | Point-in-time code-review and UX-audit reports (e.g. `backend-review.md`, `ux-audit-2026-10.md` with its screenshots) produced by the REVIEW stage of `ROADMAP.md` — findings with file:line, not living documentation. |
+| `docs/research` | One committed research note, `otel-replay-options.md` (OTel conventions, viewer options, what "replay" can honestly mean). The other research notes stay local and gitignored. |
+| `docs/review` | Point-in-time code-review and UX-audit reports (e.g. `backend-review.md`, `ux-audit-2026-10.md` with its screenshots, `public-repo-audit-2026-10.md`) produced by the REVIEW stage of `ROADMAP.md` — findings with file:line, not living documentation. |
 | `data` | Classifier training data: `prompts.json` (200 drafted rows across the 9 use cases, `tier: null` until the operator hand-labels them). |
+| `data/results` | `run-a.csv` and `run-b.csv`: one row per request for the two scoring batteries behind the README's Results tables (ids, tiers, judge score, costs, tokens; no prompt or output text). Exported by `scripts/export_battery_csv.py`. |
 | `data/fixtures` | Committed demo data (`demo.sqlite`) so the UI and API demo fully populated with no model running. Synthetic, not battery output — built by `scripts/make_demo_fixture.py`. |
 | `knowledge` | OKF knowledge bundle — the domain concepts (tiers, classifier, judge, replay) as markdown, reachable from `knowledge/index.md`. |
 | `knowledge/domain` | Concept files for the router's core domain vocabulary: tiers, classifier, judge, replay. |

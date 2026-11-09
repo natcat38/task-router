@@ -3,7 +3,8 @@
 This repo follows the addyosmani/agent-skills lifecycle on the house ROADMAP. The
 table below is the binding skills contract for every session in this repo: the
 owner skill(s) per stage, and the duplicate-purpose skills that must **not** be
-invoked here. Copied verbatim from `docs/research/SPRINT-PLAN.md` §4.
+invoked here. It comes from the project's original sprint plan, a local working
+document that is not committed.
 
 ## Skills workflow (addyosmani lifecycle on the house ROADMAP)
 

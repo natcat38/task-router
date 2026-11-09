@@ -1,10 +1,10 @@
 # Product Scope: Task Router
 
-Status: DEFINE stage, sourced from `docs/research/SPRINT-PLAN.md` §2 (D1–D10, binding) and §8, cross-checked against `docs/research/task-router-artifact.md` and `docs/research/REFUTATIONS.md` §B–D. No product decisions are made in this document — they are already made; this document states them as scope.
+Status: DEFINE stage, sourced from the project's sprint plan (decisions D1–D10, binding; a local working document, not committed), cross-checked against the shared router design it started from and a written critique of the plan. No product decisions are made in this document — they are already made; this document states them as scope.
 
 ## 1. Background & problem
 
-In the voice of the fictional user this repo is built for (SPRINT-PLAN D8):
+In the voice of the fictional user this repo is built for (sprint-plan decision D8):
 
 > I'm a solo developer. I pay for one LLM subscription and I write small scripts against it — a changelog formatter, a data cleaner, a quick classifier. Every one of those scripts calls the same expensive model, because picking a cheaper one for each task is manual work I don't do. I want the cheap model to be the default, with something behind it that catches the cheap model when it's wrong, so I don't have to babysit it. And when a request comes back wrong, or cheap, or expensive, I want to see *why the router put it there* — not just a log line, a walk through the decision.
 
@@ -66,4 +66,4 @@ These are non-negotiable and must appear in the README, not just be true in the 
 
 ## 7. Open questions
 
-None outstanding — D1–D10 in SPRINT-PLAN.md §2 resolve every product decision this document depends on.
+None outstanding — Sprint-plan decisions D1–D10 resolve every product decision this document depends on.

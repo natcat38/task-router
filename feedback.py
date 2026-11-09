@@ -1,7 +1,7 @@
 """S7: turn each ESCALATED-AND-CONFIRMED-PASSING run into a weighted
 training row for `train.py --version 2` (Tech_Scope.md §5 S7 row;
 Product_Scope.md §3.2 last bullet: "every escalation becomes a labelled
-training example"; task-router-artifact.md §06).
+training example").
 
 Only a run where `escalated` is true AND the final `judge_label` is
 "pass" counts: that is a request the router routed too low, and later
@@ -12,11 +12,11 @@ label to teach from, so it contributes nothing here.
 
 Each qualifying run becomes one training row shaped exactly like a
 `data/prompts.json` row plus a `weight` field, weighted 3x an ordinary
-hand-labelled row (Product_Scope §3.2 / task-router-artifact.md §06).
+hand-labelled row (Product_Scope §3.2).
 `train.py` consumes this as `sample_weight` during fitting, not by
 duplicating the row three times -- see train.py's docstring.
 
-IMPORTANT (REFUTATIONS #14 / Product_Scope §4): this only helps the
+IMPORTANT (Product_Scope §4): this only helps the
 classifier on near-duplicates of a prompt it has already gotten wrong
 once. features.py's 8 surface features (length, verbs, constraints, ...)
 cannot see meaning, so feedback rows do not teach the classifier to

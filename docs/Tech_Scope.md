@@ -1,6 +1,6 @@
 # Tech Scope: Task Router
 
-Status: PLAN stage. Sourced from `docs/research/SPRINT-PLAN.md` §3 (stack) and §5 (vertical slices — restated here, not reinvented), cross-checked against `docs/research/task-router-artifact.md` §01–§06 (build order/feature list), `docs/research/otel-replay-options.md` §4 (tracing schema), `docs/research/ollama-local-tier.md` and `docs/research/claude-p-backend.md` (provider mechanics), and `docs/research/REFUTATIONS.md` §B and Minor (gotchas). No product decisions are made here — `docs/Product_Scope.md` already made them; this document is how they get built.
+Status: PLAN stage. Sourced from the project's sprint plan (stack and vertical slices, restated here rather than reinvented; a local working document, not committed), cross-checked against the shared router design it started from (build order and feature list), [`docs/research/otel-replay-options.md`](research/otel-replay-options.md) §4 (tracing schema), the Ollama and `claude -p` documentation (provider mechanics), and a written critique of the plan (gotchas). No product decisions are made here — `docs/Product_Scope.md` already made them; this document is how they get built.
 
 ## 1. Stack
 
@@ -11,12 +11,12 @@ Status: PLAN stage. Sourced from `docs/research/SPRINT-PLAN.md` §3 (stack) and 
 | Classifier | scikit-learn | `LogisticRegression` on 8 hand-built features (§2) |
 | Storage | SQLite | stdlib `sqlite3`, no ORM |
 | Config | PyYAML | `registry.yaml`, `routing.yaml` |
-| Tests | pytest | fake provider only — CI never calls Ollama or `claude -p` (SPRINT-PLAN §6 rule 4) |
+| Tests | pytest | fake provider only — CI never calls Ollama or `claude -p` (sprint-plan rule: tests use the fake provider) |
 | Tracing SDK | `opentelemetry-sdk` + `opentelemetry-instrumentation-fastapi` | request-level spans auto-instrumented; classifier/tier/judge spans hand-rolled (otel-replay-options.md §2) |
 | Trace storage | Custom `SpanExporter` | ~30-line class writing directly into the SQLite `spans`/`runs` tables (otel-replay-options.md §2(c)) — no collector, no Jaeger dependency for the core deliverable |
 | UI | Vite + React + TS | reads the read API (§4); runs/waterfall/replay-diff/stats pages |
 
-Local tier model: `qwen3:1.7b` via Ollama native `/api/chat`, always called with `"think": false` (REFUTATIONS §B.7 — thinking-on-by-default inflates latency/token numbers this project exists to report honestly). Cloud tiers: `claude -p --output-format json --model sonnet|opus` via Python `subprocess`, never `--bare` (claude-p-backend.md §1 — `--bare` drops OAuth and forces API-key billing, which breaks the subscription-only constraint).
+Local tier model: `qwen3:1.7b` via Ollama native `/api/chat`, always called with `"think": false` (thinking-on-by-default inflates latency/token numbers this project exists to report honestly). Cloud tiers: `claude -p --output-format json --model sonnet|opus` via Python `subprocess`, never `--bare` (`--bare` drops OAuth and forces API-key billing, which breaks the subscription-only constraint).
 
 Tests never touch a real model. `providers.py` exposes one interface (`send(prompt, model) -> {text, input_tokens, output_tokens, latency, cost, error}`, never raises) with a fake implementation used by every test and by CI. This is stated up front because it governs every slice's test strategy in §5.
 
@@ -77,7 +77,7 @@ Editable via `PUT /v1/routing-config` (§4) without restarting the service.
   "notes": ""
 }
 ```
-`tier` is null until the operator hand-labels it (Product_Scope §6, Phase A gate). `train.py` and `battery.py` filter to rows where `tier` is non-null — 200 rows get drafted, ~60 get labelled, and running either script over the unlabelled 140 is a bug, not a feature (REFUTATIONS Minor #20).
+`tier` is null until the operator hand-labels it (Product_Scope §6, Phase A gate). `train.py` and `battery.py` filter to rows where `tier` is non-null — 200 rows get drafted, ~60 get labelled, and running either script over the unlabelled 140 is a bug, not a feature.
 
 ### The 8 classifier features (`features.py`)
 
@@ -90,7 +90,7 @@ Editable via `PUT /v1/routing-config` (§4) without restarting the service.
 7. question count
 8. numeric-token count
 
-All eight are surface features computable without a model call. Per REFUTATIONS §B.14 / Product_Scope §4, these features cannot see meaning — a trap is built to look like an easy prompt on exactly these eight numbers, so the classifier will not catch traps by construction. That is not a bug to fix here; it's why the judge exists (§3).
+All eight are surface features computable without a model call. Per Product_Scope §4, these features cannot see meaning — a trap is built to look like an easy prompt on exactly these eight numbers, so the classifier will not catch traps by construction. That is not a bug to fix here; it's why the judge exists (§3).
 
 ### SQLite tables
 
@@ -147,14 +147,14 @@ All eight are surface features computable without a model call. Per REFUTATIONS 
 3. `router.select_tier` span: the trained `LogisticRegression` scores the feature vector, picks `local`. Attribute `router.tier = "local"`.
 4. `chat qwen3:1.7b` span: `providers.py` calls Ollama native `/api/chat` with `"think": false`. Returns text, `input_tokens`, `output_tokens`, latency. `gen_ai.provider.name=ollama`, `gen_ai.request.model=qwen3:1.7b`, `gen_ai.usage.*` set.
 5. A row is written to `runs` (`tier_chosen=local`, `model_used=qwen3:1.7b`, `output_text=...`, `cost_all_tiers` computed from `registry.yaml` prices for local/sonnet/opus even though only local was actually called). The response returns to the caller here — nothing below this line blocks the caller (Product_Scope §3.1 step 3).
-6. **Background job** (sampled at `judge_sample_rate`): because the answering tier was `local`, the judge is `sonnet` — one tier above, never the same tier grading itself (Product_Scope §3.2, REFUTATIONS §D.15). A `router.judge` span calls `claude -p --model sonnet --output-format json`, asks it to score the local answer 1–5 against the `summarise` use case's threshold (4, from `routing.yaml`). Say it scores 2.
+6. **Background job** (sampled at `judge_sample_rate`): because the answering tier was `local`, the judge is `sonnet` — one tier above, never the same tier grading itself (Product_Scope §3.2, self-grading bias: ADR 0001). A `router.judge` span calls `claude -p --model sonnet --output-format json`, asks it to score the local answer 1–5 against the `summarise` use case's threshold (4, from `routing.yaml`). Say it scores 2.
 7. Below threshold → `router.escalate`: escalate exactly one tier, local → sonnet (never straight to opus). The sonnet-tier answer replaces `output_text` in the `runs` row; `escalated=true`; `escalation_chain=[{tier: "sonnet", model: "sonnet", reason: "judge_score=2<4"}]`. This escalation becomes a labelled training row for a future `train.py --version 2` (Product_Scope §3.2 last bullet) — it only helps on near-duplicates, it does not teach the classifier to see meaning it wasn't built to see.
 
-**Replay path** (Product_Scope §3.3): `POST /replay {source_run_id: "<the run above>", forced_tier: "opus"}` re-runs steps 2–7 against the same stored `input_text`, but `router.select_tier` is skipped in favor of the forced tier, recorded via an attribute (`router.tier_forced=true`) rather than silently overwritten — the audit trail shows *why* this run took that path. This produces a brand-new `run_id` (so it gets its own waterfall for free) plus one `replays` row linking `source_run_id` → `new_run_id` with a `diff_summary` (tier/model/output/judge-score deltas between the two runs). This is re-run-and-diff against a real historical request, not deterministic replay — LLM calls aren't reproducible byte-for-byte, and the README must say so (otel-replay-options.md §4; SPRINT-PLAN §8).
+**Replay path** (Product_Scope §3.3): `POST /replay {source_run_id: "<the run above>", forced_tier: "opus"}` re-runs steps 2–7 against the same stored `input_text`, but `router.select_tier` is skipped in favor of the forced tier, recorded via an attribute (`router.tier_forced=true`) rather than silently overwritten — the audit trail shows *why* this run took that path. This produces a brand-new `run_id` (so it gets its own waterfall for free) plus one `replays` row linking `source_run_id` → `new_run_id` with a `diff_summary` (tier/model/output/judge-score deltas between the two runs). This is re-run-and-diff against a real historical request, not deterministic replay — LLM calls aren't reproducible byte-for-byte, and the README must say so ([otel-replay-options.md](research/otel-replay-options.md) §4).
 
 ## 4. API contract
 
-Localhost-only. No auth layer — this runs on one person's own machine against their own subscription (Product_Scope §5 "hosted or public deployment" is explicitly out of scope). The provider interface has a slot for `ANTHROPIC_API_KEY`-based auth for a future hosted variant, but it is not exercised or tested here (SPRINT-PLAN §3, D4).
+Localhost-only. No auth layer — this runs on one person's own machine against their own subscription (Product_Scope §5 "hosted or public deployment" is explicitly out of scope). The provider interface has a slot for `ANTHROPIC_API_KEY`-based auth for a future hosted variant, but it is not exercised or tested here (ADR 0003).
 
 All error responses share one shape: `{"error": {"code": "...", "message": "...", "details": null}}`.
 
@@ -216,11 +216,11 @@ Runs the replay path (§3).
 
 ## 5. Vertical slices S0–S8
 
-Restated from SPRINT-PLAN §5 — this table is the task breakdown, not a reinvention of it. Every slice's test strategy runs against the fake provider from §1; nothing here calls a real model or costs money except the one-time smoke test in S0 and the one-time battery in S7 (SPRINT-PLAN §6 rules 3–4).
+Restated from the sprint plan — this table is the task breakdown, not a reinvention of it. Every slice's test strategy runs against the fake provider from §1; nothing here calls a real model or costs money except the one-time smoke test in S0 and the one-time battery in S7.
 
 | # | Slice | Deliverables | Est. | Phase | Test strategy (fake provider) |
 |---|---|---|---|---|---|
-| S0 | Repo + environment bring-up | `ollama update`; `ollama serve`; `ollama pull qwen3:1.7b`; **5 back-to-back `claude -p --output-format json` calls from a Python subprocess** (Windows stdin risk — claude-p-backend.md §4); one `/api/chat` call asserting `think:false` is actually honored by Ollama's response; a pytest that pins the exact local-tier request body (must include `"think": false`) so a future edit can't silently drop it | 3h | A | The `think:false` pytest is the one real assertion here and it's the point of the slice — it runs against a recorded/pinned request body, not a live model, so it stays in CI |
+| S0 | Repo + environment bring-up | `ollama update`; `ollama serve`; `ollama pull qwen3:1.7b`; **5 back-to-back `claude -p --output-format json` calls from a Python subprocess** (Windows stdin risk: before Claude Code v2.1.211 an unreadable stdin crashed the call); one `/api/chat` call asserting `think:false` is actually honored by Ollama's response; a pytest that pins the exact local-tier request body (must include `"think": false`) so a future edit can't silently drop it | 3h | A | The `think:false` pytest is the one real assertion here and it's the point of the slice — it runs against a recorded/pinned request body, not a live model, so it stays in CI |
 | S1 | Providers + baseline | `registry.yaml`; `providers.py` `send()` returning text/tokens/latency/cost/error, never raises; fake provider; `baseline.py` (10 prompts × 3 models) | 3h | A | Unit tests on the fake provider assert `send()` never raises even when the fake is configured to simulate an error, and that cost is computed correctly from `registry.yaml` prices |
 | S2 | Prompts + classifier | `data/prompts.json` (200 drafted across 9 use cases + 20 traps, `tier: null`), then STOP for labelling; `features.py` (8 features); `train.py` — LogisticRegression on labelled rows only, seeded 25% held-out **and** 5-fold CV, prints n / accuracy ± spread / confusion matrix / per-trap result | 2h | A | Unit tests on `features.py` with hand-built inputs and known expected feature vectors; `train.py` tested against a small synthetic labelled fixture, not the real 60 |
 | — | The operator labels ≥60 (1–2h, off the clock) | — | operator | A | — |
@@ -235,17 +235,17 @@ Restated from SPRINT-PLAN §5 — this table is the task breakdown, not a reinve
 
 ## 6. Gotchas
 
-- **`think:false` is not optional.** `qwen3:1.7b` runs with thinking mode ON by default in Ollama; left on, hidden reasoning tokens inflate the exact latency/cost numbers this project exists to report honestly (Product_Scope §4, REFUTATIONS §B.7). S0 and S1 both pin this in a test so a later refactor can't silently drop the flag.
+- **`think:false` is not optional.** `qwen3:1.7b` runs with thinking mode ON by default in Ollama; left on, hidden reasoning tokens inflate the exact latency/cost numbers this project exists to report honestly (Product_Scope §4). S0 and S1 both pin this in a test so a later refactor can't silently drop the flag.
 - **Windows subprocess/stdin for `claude -p`.** Windows had a real, documented stdin bug fixed at v2.1.211 (installed: 2.1.274, so this machine is fine) — but community reports describe further Windows-specific subprocess hangs and console-window spawning. S0's 5-back-to-back-calls smoke test exists specifically to catch this before the full battery depends on it. Use `subprocess.run(..., input=None)` — don't leave an unused stdin pipe attached.
-- **Filter `train.py`/`battery.py` to labelled rows only.** 200 prompts get drafted, ~60 get labelled; running either script over the unlabelled 140 null-tier rows is silent corruption, not a feature (REFUTATIONS Minor #20).
+- **Filter `train.py`/`battery.py` to labelled rows only.** 200 prompts get drafted, ~60 get labelled; running either script over the unlabelled 140 null-tier rows is silent corruption, not a feature.
 - **Judge cost is counted in savings.** A local-tier answer that gets judged by Sonnet still cost one Sonnet call — `GET /v1/stats` reports the saving both with and without judge tokens; neither figure is hidden (Product_Scope §4).
-- **Held-out set is ~15 prompts — no v1→v2 improvement claim.** 60 labels × 25% ≈ 15 test items across 3 tiers and 9 use cases; accuracy on 15 items carries roughly a ±20-point spread. `train.py --version 2` reports both models' numbers side by side, never a verdict that v2 is better (Product_Scope §4, REFUTATIONS §D.13).
-- **The classifier does not catch traps — the judge does, by design.** The 8 features (§2) are surface-only; a trap is built to look like an easy prompt on exactly those features, so logistic regression structurally cannot learn to flag it. This is stated in the README as a design fact, not hidden as a limitation (Product_Scope §4, REFUTATIONS §D.14).
-- **`battery.py` runs once, in Phase B only, subscription only, never `--bare`.** `--bare` skips OAuth/keychain auth and forces `ANTHROPIC_API_KEY` billing, which breaks the "no real money" constraint (Product_Scope §4, claude-p-backend.md §1). The battery is not re-run "to check" — only the held-out subset is re-run if needed (SPRINT-PLAN §6 rule 3).
+- **Held-out set is ~15 prompts — no v1→v2 improvement claim.** 60 labels × 25% ≈ 15 test items across 3 tiers and 9 use cases; accuracy on 15 items carries roughly a ±20-point spread. `train.py --version 2` reports both models' numbers side by side, never a verdict that v2 is better (Product_Scope §4).
+- **The classifier does not catch traps — the judge does, by design.** The 8 features (§2) are surface-only; a trap is built to look like an easy prompt on exactly those features, so logistic regression structurally cannot learn to flag it. This is stated in the README as a design fact, not hidden as a limitation (Product_Scope §4).
+- **`battery.py` runs once, in Phase B only, subscription only, never `--bare`.** `--bare` skips OAuth/keychain auth and forces `ANTHROPIC_API_KEY` billing, which breaks the "no real money" constraint (Product_Scope §4). The battery is not re-run "to check" — only the held-out subset is re-run if needed.
 - **Strip `ANTHROPIC_API_KEY` from the `claude -p` child-process environment.** If that variable happens to be set in the parent shell for any reason, an unmodified `claude` binary will prefer API-key billing over the OAuth/subscription session, silently moving cloud-tier calls onto metered billing. `providers.py`'s subprocess call must explicitly build a child environment with that key absent, not just inherit `os.environ` unchanged.
 
 ## Calls made where sources were silent or conflicted
 
 - `runs` doubles as both the OTel trace root and the request/audit record (§2) — Product_Scope §3.1 step 4 calls for "one record per request" separately from the tracing tables in otel-replay-options.md §4, but that source's own `runs` schema already carries every audit field (tier, cost, judge outcome). Keeping them as one table avoids a join with no independence gained; noted explicitly in case a reviewer expects two tables.
 - `PUT /v1/routing-config`'s concurrent-write behavior (409 on a race) is not specified anywhere in the source docs — chosen per api-and-interface-design's consistent-error-semantics principle, since a silently lost config edit is worse than a rejected one on a local single-user tool.
-- Per-endpoint error codes beyond what SPRINT-PLAN/Product_Scope state (e.g. 404 on unknown `run_id`, 422 on bad pagination) were not in the source docs and were filled in from REST convention per api-and-interface-design.
+- Per-endpoint error codes beyond what Product_Scope states (e.g. 404 on unknown `run_id`, 422 on bad pagination) were not in the source docs and were filled in from REST convention per api-and-interface-design.

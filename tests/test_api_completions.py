@@ -171,3 +171,81 @@ def test_provider_error_is_500_and_still_audited(tmp_path, routing_yaml):
 
     runs = _rows(tmp_path / "audit.sqlite", "runs")
     assert runs[0]["status"] == "error"
+
+
+# --- audit fixes: router.selector span attribute, tier_map wiring ------------
+
+
+def _span_attrs(db_path, span_name):
+    for row in _rows(db_path, "spans"):
+        if row["name"] == span_name:
+            return json.loads(row["attributes"])
+    raise AssertionError(f"no span named {span_name}")
+
+
+def test_select_tier_span_records_heuristic_when_no_model_file(tmp_path, routing_yaml, monkeypatch):
+    monkeypatch.setenv("TASK_ROUTER_MODEL_PATH", str(tmp_path / "missing.joblib"))
+    fake = FakeProvider(text="hi", input_tokens=1, output_tokens=1)
+    db_path = tmp_path / "audit.sqlite"
+    client = TestClient(create_app(db_path=db_path, send_fn=fake.send, routing_config_path=routing_yaml))
+    client.post("/v1/completions", json={"prompt": "hi", "use_case": "summarise"})
+    assert _span_attrs(db_path, "router.select_tier")["router.selector"] == "heuristic"
+
+
+def test_select_tier_span_records_model_when_model_loaded(tmp_path, routing_yaml, monkeypatch):
+    class StubModel:
+        def predict(self, vectors):
+            return ["local"]
+
+    from task_router import classifier
+
+    monkeypatch.setattr(classifier, "load_classifier", lambda path=None: StubModel())
+    fake = FakeProvider(text="hi", input_tokens=1, output_tokens=1)
+    db_path = tmp_path / "audit.sqlite"
+    client = TestClient(create_app(db_path=db_path, send_fn=fake.send, routing_config_path=routing_yaml))
+    client.post("/v1/completions", json={"prompt": "hi", "use_case": "summarise"})
+    assert _span_attrs(db_path, "router.select_tier")["router.selector"] == "model"
+
+
+def test_put_tier_map_changes_the_model_that_answers(tmp_path, routing_yaml, monkeypatch):
+    registry_path = tmp_path / "registry.yaml"
+    extra = (
+        "  - provider: ollama",
+        "    id: qwen3:4b",
+        "    tier: local",
+        "    price_in_per_m: 0.0",
+        "    price_out_per_m: 0.0",
+    )
+    nl = chr(10)
+    base = open("registry.yaml", encoding="utf-8").read().rstrip() + nl
+    registry_path.write_text(base + nl.join(extra) + nl, encoding="utf-8")
+    monkeypatch.setenv("REGISTRY_PATH", str(registry_path))
+    models_seen = []
+
+    def send(prompt, model):
+        models_seen.append(model)
+        return {"text": "hi", "input_tokens": 1, "output_tokens": 1, "latency": 0.0, "cost": 0.0, "error": None}
+
+    client = TestClient(
+        create_app(
+            db_path=tmp_path / "audit.sqlite",
+            send_fn=send,
+            select_tier_fn=lambda features: "local",
+            routing_config_path=routing_yaml,
+        )
+    )
+    body = {"prompt": "hi", "use_case": "summarise"}
+    assert client.post("/v1/completions", json=body).json()["model_used"] == "qwen3:1.7b"
+
+    put = client.put("/v1/routing-config", json={"tier_map": {"local": "qwen3:4b"}})
+    assert put.status_code == 200
+    resp = client.post("/v1/completions", json=body).json()
+    assert resp["model_used"] == "qwen3:4b"
+    assert "qwen3:4b" in models_seen
+
+
+def test_put_tier_map_naming_unregistered_model_is_422(client):
+    test_client, _db = client
+    resp = test_client.put("/v1/routing-config", json={"tier_map": {"local": "no-such-model"}})
+    assert resp.status_code == 422
+    assert resp.json()["error"]["code"] == "invalid_config"

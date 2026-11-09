@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 import yaml
 
@@ -41,6 +42,17 @@ class Registry:
             if entry.tier == tier:
                 return entry
         raise KeyError(f"no model registered for tier {tier!r}")
+
+    def resolve_tier(self, tier: str, tier_map: Optional[dict] = None) -> ModelEntry:
+        """The model that serves `tier`. routing.yaml's `tier_map` wins when
+        it names the tier; a tier absent from the map falls back to the
+        first registry model of that tier. Raises KeyError if the map names
+        an unregistered model (PUT /v1/routing-config rejects that, so this
+        only fires on a hand-edited routing.yaml)."""
+        model_id = (tier_map or {}).get(tier)
+        if model_id is not None:
+            return self.by_id(model_id)
+        return self.by_tier(tier)
 
     def cost(self, model_id: str, input_tokens: int, output_tokens: int) -> float:
         """Cost in USD at this model's registered list prices.

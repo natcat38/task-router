@@ -73,7 +73,6 @@ def test_resumed_run_skips_already_completed_ids(tmp_path, routing_yaml):
     prompts_path = _prompts_fixture(tmp_path, rows)
     progress_path = tmp_path / "progress.json"
     db_path = tmp_path / "audit.sqlite"
-    _set_sample_rate(routing_yaml, 0.0)  # no judge calls -- keep this test about resumability only
 
     fake = FakeProvider(text="answer", input_tokens=5, output_tokens=2)
     calls = []
@@ -89,6 +88,7 @@ def test_resumed_run_skips_already_completed_ids(tmp_path, routing_yaml):
         routing_config_path=routing_yaml,
         send_fn=counting_send,
         select_tier_fn=lambda features: "local",
+        judge_sample_rate=0.0,  # no judge calls -- these tests are not about judging
         sleep_fn=lambda s: None,
         print_fn=lambda s: None,
     )
@@ -104,6 +104,7 @@ def test_resumed_run_skips_already_completed_ids(tmp_path, routing_yaml):
         routing_config_path=routing_yaml,
         send_fn=counting_send,
         select_tier_fn=lambda features: "local",
+        judge_sample_rate=0.0,  # no judge calls -- these tests are not about judging
         sleep_fn=lambda s: None,
         print_fn=lambda s: None,
     )
@@ -116,7 +117,6 @@ def test_prompt_that_exhausts_retries_is_recorded_failed_and_run_continues(tmp_p
     prompts_path = _prompts_fixture(tmp_path, rows)
     progress_path = tmp_path / "progress.json"
     db_path = tmp_path / "audit.sqlite"
-    _set_sample_rate(routing_yaml, 0.0)
 
     def per_prompt_send(prompt, model):
         if "item number 0" in prompt:
@@ -133,6 +133,7 @@ def test_prompt_that_exhausts_retries_is_recorded_failed_and_run_continues(tmp_p
         routing_config_path=routing_yaml,
         send_fn=per_prompt_send,
         select_tier_fn=lambda features: "local",
+        judge_sample_rate=0.0,  # no judge calls -- these tests are not about judging
         max_retries=1,
         backoff_base_s=0.0,
         sleep_fn=lambda s: None,
@@ -141,6 +142,36 @@ def test_prompt_that_exhausts_retries_is_recorded_failed_and_run_continues(tmp_p
 
     assert "p0" in progress["failed"]
     assert "p1" in progress["completed"]  # the failure never crashed the whole run
+
+
+def test_battery_judges_every_request_even_when_routing_yaml_samples_less(tmp_path, routing_yaml):
+    # routing.yaml ships judge_sample_rate 0.2; the battery must not depend on it.
+    _set_sample_rate(routing_yaml, 0.2)
+    rows = [_labelled_row(i) for i in range(5)]
+    judge_calls = []
+
+    def send(prompt, model):
+        if "STRICT JSON" in prompt:
+            judge_calls.append(model)
+            text = '{"score": 5, "reason": "ok"}'
+        else:
+            text = "answer"
+        return {"text": text, "input_tokens": 5, "output_tokens": 2, "latency": 0.0, "cost": 0.0, "error": None}
+
+    battery.run_battery(
+        prompts_path=_prompts_fixture(tmp_path, rows),
+        progress_path=tmp_path / "progress.json",
+        db_path=tmp_path / "audit.sqlite",
+        routing_config_path=routing_yaml,
+        send_fn=send,
+        select_tier_fn=lambda features: "local",
+        sleep_fn=lambda s: None,
+        print_fn=lambda s: None,
+    )
+
+    assert len(judge_calls) == 5  # every request judged by sonnet
+    # and the operator's routing.yaml was not rewritten
+    assert yaml.safe_load(routing_yaml.read_text(encoding="utf-8"))["judge_sample_rate"] == 0.2
 
 
 # --- retry/backoff -----------------------------------------------------------

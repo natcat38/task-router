@@ -10,7 +10,7 @@ Dispatch is on the model's `provider` field in registry.yaml:
   native /api/chat endpoint via stdlib urllib.
 - `claude_cli`: run `claude -p --output-format json --model <id>` via
   subprocess, input piped through `input=` (never a dangling stdin pipe --
-  claude-p-backend.md §4 Windows gotcha), child env stripped of
+  a Windows gotcha: an unreadable stdin crashed older Claude Code builds), child env stripped of
   ANTHROPIC_API_KEY/ANTHROPIC_AUTH_TOKEN so it never falls off the Max
   subscription onto API-key billing, and never --bare (Tech_Scope.md §6).
 
