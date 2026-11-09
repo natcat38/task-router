@@ -161,7 +161,11 @@ function TimeAxis({ totalRangeMs }: { totalRangeMs: number }) {
                 ? "max-[339px]:hidden"
                 : t === 1
                   ? "-translate-x-full"
-                  : "hidden -translate-x-1/2 sm:block"
+                  : t === 0.5
+                    ? "hidden -translate-x-1/2 sm:block"
+                    : // lg–xl puts the inspector beside the waterfall, so the track is
+                      // ~130–390 px again: only 0 / half / end fit there.
+                      "hidden -translate-x-1/2 sm:block lg:hidden xl:block"
             }`}
             style={{ left: `${t * 100}%` }}
           >
@@ -398,7 +402,7 @@ export function RunWaterfallPage() {
     <div className="flex flex-col gap-6">
       <RunHeader run={run} />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem] xl:items-start">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
         <section aria-label="Span waterfall" className="min-w-0 rounded border border-line bg-panel px-5 py-4">
           <h2 className="mb-3 text-base font-semibold text-signal">Waterfall</h2>
 

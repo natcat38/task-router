@@ -92,4 +92,19 @@ describe("StatsPage", () => {
 
     expect(await screen.findByText(/Couldn't reach the router API/)).toBeInTheDocument();
   });
+  // TR-UX-16 (ADR 0004 update): a negative saving is shown as a plain "cost more" figure.
+  it("flips a negative saving into a cost-more figure with no double negative", async () => {
+    fetchMock.mockResolvedValue({ ok: true, json: async () => makeStats({ saved_pct_incl_judge: -4.3 }) });
+
+    render(
+      <MemoryRouter>
+        <StatsPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("+4.3%")).toBeInTheDocument();
+    expect(screen.getByText("Cost more, including judge cost")).toBeInTheDocument();
+    expect(screen.getByText(/cost 4\.3% more than always using the top tier/)).toBeInTheDocument();
+    expect(screen.queryByText(/Saved, including judge cost/)).not.toBeInTheDocument();
+  });
 });

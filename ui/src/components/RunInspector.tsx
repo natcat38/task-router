@@ -14,8 +14,8 @@ export const inspectorTabId = (tab: InspectorTab) => `inspector-tab-${tab}`;
 export const inspectorPanelId = (tab: InspectorTab) => `inspector-panel-${tab}`;
 
 /**
- * The run page's side panel (one column below `xl`, sticky beside the
- * waterfall from `lg`): a tab strip that switches between span details, the
+ * The run page's side panel (stacked under the waterfall below `lg`, an
+ * 18rem sticky column beside it from `lg`): a tab strip that switches between span details, the
  * request and response, and the replay form. Every panel stays mounted and is
  * only hidden, so a replay that is running or finished is not lost when the
  * viewer looks at a span.
@@ -61,7 +61,7 @@ export function RunInspector({
     <section
       ref={panelRef}
       aria-label="Run inspector"
-      className="scroll-mt-16 rounded border border-line bg-panel xl:sticky xl:top-8 xl:max-h-[calc(100dvh-4rem)] xl:overflow-y-auto"
+      className="scroll-mt-16 rounded border border-line bg-panel lg:sticky lg:top-8 lg:max-h-[calc(100dvh-4rem)] lg:overflow-y-auto"
     >
       <div
         role="tablist"
