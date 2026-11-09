@@ -1,7 +1,7 @@
 # Roadmap — task-router
 
 **Current stage: DONE — Define→Ship complete; 82 hand + 118 judge-derived labels, retrained; re-score on the hand-corrected labels is optional**
-**Next up:** nothing required. Optional follow-ups: a formal `/repo-review`; a hosted demo (needs an API key — out of scope, D4); more/balanced opus labels + a sub-1.0 `judge_sample_rate` re-run if the operator later wants the router to show a positive saving.
+**Next up:** nothing required. Optional follow-ups: a formal `/repo-review`; a hosted demo (needs an API key — out of scope, D4); more/balanced opus labels + a sub-1.0 `judge_sample_rate` re-run if the operator later wants the router to show a positive saving. (2026-11-09: UX open items settled, no stage change: run page two columns from `lg` with an 18rem inspector, a negative saving shown as "cost more", and a page-overflow fix on the run page; ADR 0004 update, audit record in `docs/review/ux-audit-2026-10.md`.)
 
 **Post-ship addition (2026-09-18/20):** `auto_label.py` (PR #19) derived tiers for the 140 unlabelled rows (forced-`local`, escalate to first judge-pass). Operator ran it (140/140) → merged to 200 labels (60 hand + 140 judge_auto, `tier_source`-tagged, PR #20) → retrained (held-out 0.52 / 5-fold CV 0.645±0.058, opus now learnable). Operator re-ran the full 200-row scoring battery → **Run B: +50.9% excl-judge / +8.1% incl-judge** (both positive) vs the earlier **Run A (60 hand): −11.6% / −68.6%**. Both in the README with a prominent self-referential caveat (Run B's 140 labels came from the same lenient judge that scores it; Run A is the more trustworthy measure). PRs #19–#21.
 

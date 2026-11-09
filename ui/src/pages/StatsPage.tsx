@@ -68,11 +68,21 @@ export function StatsPage() {
           value={formatPct(stats.saved_pct_excl_judge)}
           hint="Local tier's saving vs. always using the top tier -- judge calls not counted."
         />
-        <StatTile
-          label="Saved, including judge cost"
-          value={formatPct(stats.saved_pct_incl_judge)}
-          hint="Same comparison, with the judge call's own cost counted against the saving."
-        />
+        {/* TR-UX-16 (owner call, ADR 0004 2026-11-09 update): a negative saving reads as a
+            double negative ("Saved: -4.3%"), so it flips to a plain "cost more" figure. */}
+        {stats.saved_pct_incl_judge < 0 ? (
+          <StatTile
+            label="Cost more, including judge cost"
+            value={`+${formatPct(-stats.saved_pct_incl_judge)}`}
+            hint={`Routing plus judging cost ${formatPct(-stats.saved_pct_incl_judge)} more than always using the top tier.`}
+          />
+        ) : (
+          <StatTile
+            label="Saved, including judge cost"
+            value={formatPct(stats.saved_pct_incl_judge)}
+            hint="Same comparison, with the judge call's own cost counted against the saving."
+          />
+        )}
       </div>
 
       <p className="max-w-prose text-fog">

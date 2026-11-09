@@ -19,4 +19,12 @@ A UX audit on 2026-10-23 measured the UI in `ui/` against `docs/Design_Direction
 - The two-column breakpoint is `xl`, not the `lg` the decision named. With the 224px nav rail beside it, the waterfall's bar track was only 70px wide at 1024px, too narrow to read.
 - Run page with a span open: 1.0 screens on desktop (the panel was below the fold), 1.4 -> 1.17 on a phone. Phone runs list (20 rows): 3.8 -> 1.82 screens.
 - External font hosts 2 -> 0; all six Plex faces load with the network blocked. The UI gains two font packages.
-- Still open with the owner: whether the Stats page explains a negative saving with a note such as "(more than always using the top tier)" (TR-UX-16).
+- ~~Still open with the owner: TR-UX-16.~~ Settled 2026-11-09, see the update below.
+
+## Update 2026-11-09: two columns from `lg`, and a negative saving reads as "cost more"
+
+Owner decisions from the walkthrough of the open UX items (evidence in [`docs/review/ux-audit-2026-10.md`](../review/ux-audit-2026-10.md)).
+
+- **Breakpoint.** The run page is two columns from `lg` (1024px), as the original decision named, with the inspector narrowed from 24rem to 18rem. Measured bar track: 134px at 1024, 262 at 1152, 390 at 1280 (it was 294 at 1280 with the 24rem panel). Plain `lg` with the 24rem panel was measured at 38px and rejected. Between `lg` and `xl` the time axis shows only the 0, half and end labels, because five labels overlap on a 134px track. This supersedes the "`xl`, not `lg`" consequence above.
+- **Grid column floor.** The run page grid sets `grid-cols-[minmax(0,1fr)]` below `lg`. Without it, opening a span with a long raw-attributes line made the page 1,796 to 2,036px wide at every width under 1280 (WCAG 1.4.10 Reflow).
+- **TR-UX-16.** When the saving including judge cost is below zero, the Stats tile reads "Cost more, including judge cost" with a positive figure (for example "+4.3%") and the line "Routing plus judging cost 4.3% more than always using the top tier." A positive saving keeps the original label. The excluding-judge tile is unchanged.
