@@ -6,7 +6,7 @@ This is the point-in-time record of the October 2026 UX polish pass on `ui/`, ke
 Key screenshots:
 
 - Run page at 1440, before and after the two-column layout: [before](ux-audit-2026-10-run-before-1440.png), [after](ux-audit-2026-10-run-after-1440.png)
-- Run page at 1024 with a span open, before the 2026-11-09 fix (page 2,036 px wide): [overflow](ux-audit-2026-11-run-overflow-before-1024.png); plain `lg` with the old 24rem panel (38 px bars, rejected): [plain lg](ux-audit-2026-11-run-plain-lg-rejected-1024.png); after (18rem panel, 134 px bars): [after](ux-audit-2026-11-run-lg-after-1024.png)
+- Run page at 1024 with a span open: plain `lg` with the old 24rem panel (38 px bars, rejected): [plain lg](ux-audit-2026-11-run-plain-lg-rejected-1024.png); after (18rem panel, 134 px bars): [after](ux-audit-2026-11-run-lg-after-1024.png)
 - Stats with a negative saving, after: [stats](ux-audit-2026-11-stats-after-1440.png)
 
 ---
