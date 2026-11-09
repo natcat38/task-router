@@ -2,7 +2,7 @@
 
 Loads data/prompts.json, filters to hand-labelled rows only (tier is null
 on every drafted row until the operator labels it -- running this over the
-unlabelled rows is silent corruption, not a feature: REFUTATIONS Minor #20),
+unlabelled rows is silent corruption, not a feature),
 fits a LogisticRegression on the 8 features from features.py, and reports:
 
 - n (the labelled count)
@@ -24,7 +24,7 @@ at fit time (weight 3 vs 1 for an ordinary labelled row), not by literally
 duplicating the row three times, which would distort StratifiedKFold's
 class balancing for no benefit. v1 and v2 are always printed side by side;
 this script makes no v1-vs-v2 improvement claim anywhere (the held-out set
-is ~15 items -- Product_Scope §4, REFUTATIONS §D.13).
+is ~15 items -- Product_Scope §4).
 """
 
 from __future__ import annotations
@@ -54,7 +54,7 @@ NO_LABELLED_ROWS_MESSAGE = (
 NO_IMPROVEMENT_CLAIM_NOTE = (
     "NOTE: v1 and v2 are reported side by side with NO claim that v2 is better -- "
     "the held-out set is ~15 items, carrying roughly a +/-20-point spread "
-    "(Product_Scope Sec4 / REFUTATIONS Sec D.13)."
+    "(Product_Scope Sec4)."
 )
 
 

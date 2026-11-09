@@ -8,10 +8,10 @@ them. Run with:
     uv run python scripts/smoke_claude.py
 
 References:
-- docs/research/claude-p-backend.md §1 (JSON fields), §4 (Windows stdin bug
-  fixed at v2.1.211; use subprocess.run(..., input=<str>) with no dangling
-  stdin pipe).
-- docs/research/ollama-local-tier.md §4 (native /api/chat fields).
+- `claude -p --output-format json` returns result, usage and cost fields. On
+  Windows, before Claude Code v2.1.211 an unreadable stdin crashed the call;
+  use subprocess.run(..., input=<str>) with no dangling stdin pipe.
+- Ollama's native /api/chat returns the token counts and timing fields.
 - docs/Tech_Scope.md §6 (strip ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN from
   the child env so claude -p never silently falls back to API-key billing).
 """
@@ -50,7 +50,7 @@ def subscription_env() -> dict[str, str]:
 def run_claude_smoke() -> bool:
     """Run `claude -p` five times back-to-back; return True iff all succeed.
 
-    Windows-safe pattern per claude-p-backend.md §4: pass the prompt via
+    Windows-safe pattern (see module docstring): pass the prompt via
     `input=` as a single subprocess.run call (no persistent stdin pipe left
     open, no interactive handshake) and always set an explicit timeout so a
     hang is visible instead of blocking forever.
@@ -102,7 +102,7 @@ def run_claude_smoke() -> bool:
 def run_ollama_think_false_smoke() -> bool:
     """One native /api/chat call with think:false; confirm no thinking output.
 
-    Per ollama-local-tier.md §4, only the native /api/chat endpoint carries
+    Only the native /api/chat endpoint carries
     the extra fields we need; per Tech_Scope.md §6, qwen3:1.7b runs with
     thinking ON by default, so this call must set "think": false explicitly
     and this smoke test must prove that flag actually suppresses it (no

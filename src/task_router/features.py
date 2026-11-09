@@ -3,7 +3,7 @@
 length, instruction-verb count, constraint count, supplied-context present,
 output-format specified, reasoning-word count, question count, and
 numeric-token count -- all computable from the prompt text alone, no model
-call. Per Product_Scope.md §4 and REFUTATIONS §B.14/§D.14: these features
+call. Per Product_Scope.md §4: these features
 are surface-only by design. A trap prompt (see data/prompts.json) is built
 to score like an easy prompt on exactly these eight numbers, so this module
 cannot see traps and is not trying to -- catching traps is the judge's job

@@ -152,6 +152,15 @@ def judge_and_escalate(
     (repeating one tier at a time while still under threshold and a tier
     remains) -> persist. Never raises.
 
+    Judge and escalation targets resolve through routing.yaml's `tier_map`
+    (registry.by_tier when a tier is absent from it).
+
+    A failed escalation re-answer leaves the original answer in place: the
+    row gets escalated=0, judge_label "escalation_failed", and the chain
+    entry is kept for the trace. After a successful escalation whose new
+    answer is never judged, judge_score is NULL (the old score described the
+    discarded answer).
+
     Reloads routing.yaml at call time (not at request time) so a live
     `PUT /v1/routing-config` edit (sample rate, thresholds) takes effect on
     the very next background job, per the "editable without restarting"
@@ -185,13 +194,15 @@ def judge_and_escalate(
     final_score: Optional[int] = None
     final_label: Optional[str] = None
     attempted = False
+    escalated = False  # True only once a re-answer actually replaced the answer
+    tier_map = config.get("tier_map")
 
     while True:
         judge_tier = judge_tier_above(current_tier)
         if judge_tier is None:
             break  # opus (or an unrecognised tier) -- no tier above it, unjudged by construction
 
-        judge_model = registry.by_tier(judge_tier)
+        judge_model = registry.resolve_tier(judge_tier, tier_map)
         attempted = True
 
         with tracer.start_as_current_span("router.judge", context=parent_ctx) as judge_span:
@@ -217,7 +228,6 @@ def judge_and_escalate(
             final_label = "pass"
             break
 
-        final_label = "escalated"
         reason = f"judge_score={final_score}<{threshold}"
 
         with tracer.start_as_current_span("router.escalate", context=parent_ctx) as esc_span:
@@ -235,6 +245,9 @@ def judge_and_escalate(
         total_escalation_cost += reanswer.get("cost", 0.0) or 0.0
 
         if reanswer.get("error"):
+            # The original answer stands, so it keeps its own score; the
+            # chain entry stays for the trace, but escalated stays False.
+            final_label = "escalation_failed"
             escalation_chain.append(
                 {
                     "tier": judge_tier,
@@ -245,6 +258,13 @@ def judge_and_escalate(
             break
 
         escalation_chain.append({"tier": judge_tier, "model": judge_model.id, "reason": reason})
+        escalated = True
+        final_label = "escalated"
+        # The score above belongs to the answer just replaced. Clear it: if
+        # the new answer is judged, the next pass sets its own score; if it
+        # is never judged (opus has no judge above it, or the judge call
+        # fails), no score is persisted rather than the discarded one.
+        final_score = None
         current_tier = judge_tier
         current_model_id = judge_model.id
         current_output = reanswer["text"]
@@ -256,7 +276,6 @@ def judge_and_escalate(
     if not attempted:
         return  # opus tier: nothing was ever judged, nothing to persist
 
-    escalated = bool(escalation_chain)
     conn.execute(
         "UPDATE runs SET judge_score=?, judge_label=?, escalated=?, "
         "escalation_chain=?, tier_chosen=?, model_used=?, output_text=?, "

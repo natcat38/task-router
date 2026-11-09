@@ -6,8 +6,8 @@ can't silently drop it (Tech_Scope.md §6 gotcha: qwen3:1.7b runs with
 thinking mode ON by default in Ollama, and leaving it on inflates the
 latency/token numbers this project exists to report honestly).
 
-See docs/research/ollama-local-tier.md §4 for the native /api/chat contract
-this body is shaped for.
+The body is shaped for Ollama's native /api/chat endpoint (the one that
+returns token counts and timing fields).
 """
 
 from __future__ import annotations

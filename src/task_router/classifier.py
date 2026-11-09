@@ -4,9 +4,9 @@ deterministic heuristic.
 Tech_Scope.md §5 S3 row and §3 step 3 (`router.select_tier` scores the
 feature vector, picks a tier). train.py (S2) saves a LogisticRegression to
 `models/classifier_v<version>.joblib` once the operator has hand-labelled
->=60 prompts (Product_Scope §6 Phase A gate). That labelling has not
-happened yet at S3 build time -- no model file exists -- so this module
-must work end-to-end with nothing on disk.
+>=60 prompts (Product_Scope §6 Phase A gate). `models/` is gitignored, so
+a fresh clone has no model file until `uv run python train.py` is run; this
+module must still work end-to-end with nothing on disk.
 
 Fallback heuristic (`heuristic_select_tier`, used only when no model file
 loads): a small weighted score over the same 8 surface features
@@ -14,9 +14,9 @@ features.py already computes. Heavier reasoning load, more explicit
 constraints, and longer prompts push toward a higher tier; a short,
 unconstrained prompt stays on the free local tier, which matches the
 product's stated default of "the cheap model is the default"
-(Product_Scope §1). This is a placeholder to make the API answerable
-before real labels exist -- it is not a decision boundary trained on data,
-and it is not meant to survive S2's actual training run.
+(Product_Scope §1). This is a placeholder that keeps the API answerable when no
+trained model is on disk -- it is not a decision boundary trained on data.
+`router.selector` on the select_tier span says which path ran.
 """
 
 from __future__ import annotations
@@ -78,6 +78,19 @@ def load_classifier(path: Optional[Path] = None):
     if not p.exists():
         return None
     return joblib.load(p)
+
+
+def select_tier_with_source(features: dict, model=None) -> tuple[str, str]:
+    """Like `select_tier`, but also says which selector decided: "model"
+    (the trained classifier) or "heuristic" (the placeholder fallback used
+    when no model file is on disk). api.py records it on the select_tier
+    span as `router.selector`."""
+    if model is None:
+        model = load_classifier()
+    if model is None:
+        return heuristic_select_tier(features), "heuristic"
+    vector = [features_to_vector(features)]
+    return str(model.predict(vector)[0]), "model"
 
 
 def select_tier(features: dict, model=None) -> str:

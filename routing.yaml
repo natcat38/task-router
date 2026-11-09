@@ -1,12 +1,14 @@
 # Routing config for task-router (Tech_Scope.md §2 shape).
 #
 # Editable live via PUT /v1/routing-config (Tech_Scope.md §4) -- no restart
-# needed. judge_sample_rate is 1.0 for the S7 battery; dial it down after.
+# needed. judge_sample_rate ships at 0.2 (judge one request in five). The
+# scoring battery (battery.py) sets 1.0 itself on a temporary copy of this
+# file, so this value never has to be changed for it.
 tier_map:
   local: qwen3:1.7b
   sonnet: sonnet
   opus: opus
-judge_sample_rate: 1.0
+judge_sample_rate: 0.2
 use_cases:
   extract:
     judge_threshold: 4

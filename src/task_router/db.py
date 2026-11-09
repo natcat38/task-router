@@ -13,7 +13,8 @@ start (api.py's `create_app()` does this); stdlib `sqlite3`, no ORM
 `replays` is created here too even though S5 (replay read-API) is the slice
 that reads/writes it -- the CREATE TABLE IF NOT EXISTS is trivial and one
 schema-init call is simpler than two, so it costs nothing to have it exist
-one slice early. No replay read/write code exists yet.
+one slice early. api.py's
+`POST /replay` and `GET /runs` read and write it.
 """
 
 from __future__ import annotations

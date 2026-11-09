@@ -1,7 +1,7 @@
 # Roadmap — task-router
 
 **Current stage: DONE — Define→Ship complete; 82 hand + 118 judge-derived labels, retrained; re-score on the hand-corrected labels is optional**
-**Next up:** nothing required. Optional follow-ups: a formal `/repo-review`; a hosted demo (needs an API key — out of scope, D4); more/balanced opus labels + a sub-1.0 `judge_sample_rate` re-run if the operator later wants the router to show a positive saving. (2026-11-09: UX open items settled, no stage change: run page two columns from `lg` with an 18rem inspector, a negative saving shown as "cost more", and a page-overflow fix on the run page; ADR 0004 update, audit record in `docs/review/ux-audit-2026-10.md`.)
+**Next up:** nothing required. (2026-11-09: public-repo audit findings closed, record in `docs/review/public-repo-audit-2026-10.md`; no stage change.) Optional follow-ups: a formal `/repo-review`; a hosted demo (needs an API key — out of scope, D4); more/balanced opus labels + a sub-1.0 `judge_sample_rate` re-run if the operator later wants the router to show a positive saving. (2026-11-09: UX open items settled, no stage change: run page two columns from `lg` with an 18rem inspector, a negative saving shown as "cost more", and a page-overflow fix on the run page; ADR 0004 update, audit record in `docs/review/ux-audit-2026-10.md`.)
 
 **Post-ship addition (2026-09-18/20):** `auto_label.py` (PR #19) derived tiers for the 140 unlabelled rows (forced-`local`, escalate to first judge-pass). Operator ran it (140/140) → merged to 200 labels (60 hand + 140 judge_auto, `tier_source`-tagged, PR #20) → retrained (held-out 0.52 / 5-fold CV 0.645±0.058, opus now learnable). Operator re-ran the full 200-row scoring battery → **Run B: +50.9% excl-judge / +8.1% incl-judge** (both positive) vs the earlier **Run A (60 hand): −11.6% / −68.6%**. Both in the README with a prominent self-referential caveat (Run B's 140 labels came from the same lenient judge that scores it; Run A is the more trustworthy measure). PRs #19–#21.
 
@@ -27,12 +27,12 @@ Exit: user has signed off the product scope. ✅ Signed off 2026-09-18. Skills: 
 - [x] One ADR in `docs/adr/` per non-obvious decision, written when the decision is made, not after. (0001 judge, 0002 replay, 0003 provider auth)
 - [x] `docs/Design_Direction.md` — written in S6a: IBM Plex Sans/Mono, restrained blue-slate palette, tier-color trio (teal local / amber sonnet / rose opus) as the signature element; states + quality floor covered.
 
-Exit: numbered vertical slices exist and the user approves. ⏳ Awaiting Build sign-off. Skills: superpowers:writing-plans, to-issues, hallmark (design direction).
+Exit: numbered vertical slices exist and the user approves. ✅ Approved; Build is done. Skills: superpowers:writing-plans, to-issues, hallmark (design direction).
 
 ## 3 · Build — the only stage where feature code happens
 
 - [x] Day-1 hygiene, before feature work: `.gitignore` · README stub · OKF knowledge bundle + validator (local + CI) · CI (`uv run pytest`) green on first push · /protect-repo (ruleset active) · config via env vars from the start. Docker/compose: **N/A** — Ollama runs natively on the GPU, SQLite is embedded stdlib.
-- [ ] Vertical slices from the Tech Scope, in order. Every slice: implement → test → commit with a message that names the slice. No slice starts while the previous one is red.
+- [x] Vertical slices from the Tech Scope, in order (S0–S8 all done). Every slice: implement → test → commit with a message that names the slice. No slice starts while the previous one is red.
   - [x] **S0** environment bring-up + `claude -p`/Ollama smoke + `think:false` request-body pin — PR #1 (`eb3ba50`)
   - [x] **S1** Providers + baseline (registry.yaml, providers.py, fake provider, baseline.py built; not run live) — PR #2 (`10183c8`)
   - [x] **S2** Prompts + classifier (prompts.json 200 drafted, `tier:null` → STOP for labelling; features.py; train.py) — PR #3 (`e0173db`)
@@ -73,7 +73,7 @@ Exit: findings addressed. ✅ Skills: code-review, simplify, web-design-guidelin
 - [ ] Deployed demo link — **N/A by design** (local-only, D4; hosted use needs an API key — the provider slot exists but isn't exercised).
 - [ ] Final `/repo-review` — optional; available if the operator wants a formal recruiter-readiness audit. Substantive quality work already done in Verify + Review.
 
-Exit: recruiter-ready. Outstanding: the **battery** (blocked by the harness — operator must run it) to fill live routing/saving numbers + train v2. Skills: repo-review.
+Exit: recruiter-ready. The battery has run (Run A and Run B, see "Battery" above and the README); the only open item is the optional re-score on the hand-corrected labels. Skills: repo-review.
 
 ## House rules
 

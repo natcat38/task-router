@@ -16,6 +16,8 @@ from typing import Optional
 
 import yaml
 
+from task_router.registry import load_registry
+
 DEFAULT_ROUTING_PATH = Path(__file__).resolve().parent.parent.parent / "routing.yaml"
 
 KNOWN_TIERS = ("local", "sonnet", "opus")
@@ -41,10 +43,16 @@ def load_config(path: Optional[Path] = None) -> dict:
 
 
 def _validate(config: dict) -> None:
-    for tier in config.get("tier_map", {}):
+    registered_ids = {m.id for m in load_registry().models}
+    for tier, model_id in (config.get("tier_map") or {}).items():
         if tier not in KNOWN_TIERS:
             raise InvalidConfigError(
                 f"unknown tier {tier!r}; must be one of {KNOWN_TIERS}"
+            )
+        if model_id not in registered_ids:
+            raise InvalidConfigError(
+                f"tier_map[{tier!r}] names {model_id!r}, which is not a model "
+                f"in registry.yaml (registered: {sorted(registered_ids)})"
             )
     for use_case, settings in (config.get("use_cases") or {}).items():
         threshold = (settings or {}).get("judge_threshold")

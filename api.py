@@ -157,7 +157,7 @@ def create_app(
 ) -> FastAPI:
     conn = db_module.get_connection(db_path)
     send = send_fn or default_send
-    select_tier = select_tier_fn or classifier_module.select_tier
+    select_tier = select_tier_fn
     tracer, provider = tracing_module.setup_tracing(conn)
 
     app = FastAPI(title="task-router")
@@ -207,12 +207,19 @@ def create_app(
             if forced_tier is not None:
                 tier = forced_tier
                 tier_span.set_attribute("router.tier_forced", True)
+            elif select_tier is not None:
+                tier = select_tier(features)  # injected (tests, battery)
             else:
-                tier = select_tier(features)
+                tier, selector = classifier_module.select_tier_with_source(features)
+                tier_span.set_attribute("router.selector", selector)
             tier_span.set_attribute("router.tier", tier)
 
         registry = load_registry()
-        model_entry = registry.by_tier(tier)
+        try:
+            tier_map = routing_config_module.load_config(routing_config_path).get("tier_map")
+        except FileNotFoundError:
+            tier_map = None
+        model_entry = registry.resolve_tier(tier, tier_map)
 
         with tracer.start_as_current_span(f"chat {model_entry.id}") as chat_span:
             provider_name = "ollama" if model_entry.provider == "ollama" else "anthropic"
@@ -228,7 +235,7 @@ def create_app(
 
         cost_all_tiers: dict[str, Optional[float]] = {}
         for t in KNOWN_TIERS:
-            entry = registry.by_tier(t)
+            entry = registry.resolve_tier(t, tier_map)
             cost_all_tiers[t] = registry.cost(
                 entry.id, result["input_tokens"], result["output_tokens"]
             )

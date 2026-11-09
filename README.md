@@ -75,7 +75,7 @@ request → [router.classify]  8 surface features, no model call
    custom OTel SpanExporter. This is the trace and the audit record.
 ```
 
-The React UI reads that same SQLite data through a read-only API: a runs
+The React UI reads that same SQLite data through the backend API: a runs
 list, a span waterfall per run (with an attribute drawer), a replay-and-diff
 panel, and a stats page (savings shown two ways, see Honesty below). See
 [`docs/Tech_Scope.md`](docs/Tech_Scope.md) for the full data model and API
@@ -83,9 +83,36 @@ contract, and [ADR 0001](docs/adr/0001-judge-tier-above-sampled.md) for why
 the judge is tier-above rather than a fixed all-Opus judge or same-tier
 self-grading.
 
+The API is not read-only and has no authentication. `POST /replay` makes real
+model calls, and `PUT /v1/routing-config` rewrites `routing.yaml` on disk.
+It is built for one person on `localhost`; do not bind it to a public
+address.
+
+If the judge call fails, times out, or returns something unparseable, the
+cheap answer stands: the run is left unjudged and unescalated (judge score
+and label stay empty, the only trace is an error status on the `router.judge`
+span). If the judge scores an answer low but the escalation re-answer then
+fails, the original answer also stands; the run is labelled
+`escalation_failed` and is not counted as escalated. If the answering model
+itself fails, nothing falls back: the caller gets HTTP 500 and the failed run
+is still recorded.
+
 ## Run in 3 commands
 
-Three processes, each in its own terminal.
+**Once, before the first run: train the classifier.** The trained model is
+not committed (`models/` is gitignored). Without it the router silently
+falls back to a hand-written placeholder heuristic, not the model described
+above:
+
+```
+uv sync
+uv run python train.py
+```
+
+Each routed request records which path decided on its `router.select_tier`
+span, as `router.selector` = `model` or `heuristic`.
+
+Then three processes, each in its own terminal.
 
 **1. Backend** (FastAPI + SQLite, from the repo root):
 
@@ -124,7 +151,7 @@ The backend allows cross-origin requests from the Vite dev server
 | `TASK_ROUTER_DB` | `data/audit.sqlite` | `api.py` / `db.py`: which SQLite file the backend reads and writes. Point this at `data/fixtures/demo.sqlite` to run the UI against the committed demo data with nothing else running (see below). |
 | `OLLAMA_HOST` | `http://localhost:11434` | `providers.py`: where the local-tier `/api/chat` call goes. |
 | `REGISTRY_PATH` | `registry.yaml` | `registry.py`: the tier/model/price table. |
-| `ROUTING_CONFIG_PATH` | `routing.yaml` | `routing_config.py`: tier map, judge sample rate, per-use-case thresholds. |
+| `ROUTING_CONFIG_PATH` | `routing.yaml` | `routing_config.py`: tier map (tier to model id, read on every request), judge sample rate, per-use-case thresholds. |
 | `VITE_API_BASE` | `http://localhost:8000` | `ui/src/api/client.ts`: where the UI's read API calls go. |
 | `CORS_ALLOW_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | `api.py`: comma-separated origins allowed to call the backend from a browser. |
 
@@ -139,7 +166,9 @@ on hand:
 TASK_ROUTER_DB=data/fixtures/demo.sqlite uv run uvicorn api:app
 ```
 
-Then start the UI as above. Regenerate the fixture with
+Then start the UI as above. The fixture is read-only demo data: the replay
+button calls the real models, so it returns an error unless Ollama and
+`claude -p` are running. Regenerate the fixture with
 `uv run python scripts/make_demo_fixture.py`, which deterministically
 rebuilds the same rows every time. `tests/test_demo_fixture.py` checks the
 committed file matches what the script currently produces.
@@ -208,11 +237,22 @@ subscription (`claude -p`, never `--bare`); both are reported at
 `registry.yaml`'s list prices, nothing actually billed (see Honesty
 above).
 
+Every number below is recomputed from the committed per-request files
+[`data/results/run-a.csv`](data/results/run-a.csv) and
+[`data/results/run-b.csv`](data/results/run-b.csv) (ids, tiers, judge score,
+costs and answer tokens; no prompt or output text).
+`uv run python scripts/export_battery_csv.py --summarise data/results/run-b.csv`
+prints the totals. "Routed" is the classifier's pick, derived from the first
+escalation step; "final" is the tier of the answer the caller got.
+Both batteries set `judge_sample_rate` to 1.0 (`battery.py` applies it
+itself); `routing.yaml` ships 0.2 for normal use.
+
 | | Run A (60 hand labels) | Run B (200 labels, retrained) |
 |---|---|---|
 | Prompts | 60 | 200 (201 runs recorded, 1 duplicate row) |
 | Failures | 0 | 0 |
-| Routed tiers | local 27 / sonnet 26 / opus 7 | local 120 / sonnet 73 / opus 8 |
+| Routed tier (classifier pick) | local 42 / sonnet 17 / opus 1 | local 163 / sonnet 38 / opus 0 |
+| Final tier (after escalation) | local 27 / sonnet 26 / opus 7 | local 120 / sonnet 73 / opus 8 |
 | Escalations | 17 | 46 |
 | Saved, excl. judge | **-11.6%** | **+50.9%** |
 | Saved, incl. judge | **-68.6%** | **+8.1%** |
@@ -286,9 +326,9 @@ above).
 
 #### Why Run B flipped positive
 
-The retrained classifier has learned enough about the opus tier to route
-about 60% of requests to the free local tier, and the judge accepts most
-of those answers. That leaves far fewer escalations relative to the
+The retrained classifier routed 163 of 201 requests (81%) to the free
+local tier. After the judge sent 43 of those up, 120 (about 60%) ended on
+local, and the judge accepted most of those answers. That leaves far fewer escalations relative to the
 all-Opus baseline than Run A had, so the router comes out ahead instead of
 behind.
 
@@ -320,9 +360,11 @@ pays off and one where it doesn't, not to report a single headline saving.
 This project's value is the honest measurement, the full instrumentation,
 and the routing-pipeline replay debugger, not either number on its own.
 
-### Classifier: v1 vs v2, no improvement claim
+### Classifier: v1 vs v2, no improvement claim (historical, 60-label era)
 
-Same seeded held-out ids for both, about 15 items.
+This table is from the 60-label classifier, before the 200-label retrain.
+The commands under Reproduce now run on the 200 labels and print different
+numbers. Same seeded held-out ids for both, about 15 items.
 
 | | Held-out accuracy | 2-fold CV |
 |---|---|---|
@@ -333,8 +375,10 @@ v2 did not improve on v1. The 11 sonnet-weighted feedback rows, added from
 this run's escalations, pushed the classifier toward sonnet, which hurt it
 on this small held-out set. That's expected, not a bug: feedback like this
 mainly helps on near-duplicate prompts, and can hurt accuracy on a
-held-out set this small (`docs/Product_Scope.md` §4;
-`docs/research/REFUTATIONS.md` #13/#14).
+held-out set this small (`docs/Product_Scope.md` §4). With about 15
+held-out items, accuracy carries roughly a 20-point spread, and the eight
+surface features cannot see meaning, so feedback rows only help on
+near-duplicates.
 
 ### Reproduce
 

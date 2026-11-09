@@ -68,6 +68,7 @@ def tracer(conn):
 def routing_yaml(tmp_path):
     dest = tmp_path / "routing.yaml"
     shutil.copy("routing.yaml", dest)
+    _set_sample_rate(dest, 1.0)  # shipped default is 0.2; these tests need every run judged
     return dest
 
 
@@ -378,3 +379,82 @@ def test_judge_provider_error_does_not_escalate_or_crash(conn, tracer, routing_y
     assert run["escalated"] == 0
     assert run["judge_score"] is None
     assert run["judge_cost"] == 0  # provider never actually answered -- no cost
+
+
+# --- audit fixes: failed re-answer, stale score after two hops ---------------
+
+
+def test_failed_reanswer_does_not_mark_run_escalated(conn, tracer, routing_yaml):
+    def fake_send(prompt, model):
+        if "STRICT JSON" in prompt:
+            return _result('{"score": 2, "reason": "wrong facts"}', cost=0.002)
+        return _result("", error="sonnet unavailable")  # the escalation re-answer fails
+
+    _insert_run(conn, RUN_ID, "local", "qwen3:1.7b", "local answer")
+    _judge(
+        conn, tracer, routing_yaml, fake_send,
+        tier_chosen="local", model_id="qwen3:1.7b", output_text="local answer",
+    )
+
+    run = _fetch_run(conn, RUN_ID)
+    assert run["escalated"] == 0
+    assert run["judge_label"] == "escalation_failed"
+    assert run["tier_chosen"] == "local"  # the original answer stands
+    assert run["model_used"] == "qwen3:1.7b"
+    assert run["output_text"] == "local answer"
+    assert run["judge_score"] == 2  # the score of the answer that stayed
+    chain = json.loads(run["escalation_chain"])  # kept for the trace
+    assert len(chain) == 1 and "re-answer failed" in chain[0]["reason"]
+
+
+def test_two_hop_escalation_to_unjudged_opus_persists_no_score(conn, tracer, routing_yaml):
+    def fake_send(prompt, model):
+        if "STRICT JSON" in prompt:
+            # local is judged by sonnet (2), the sonnet answer by opus (2).
+            return _result('{"score": 2, "reason": "weak"}', cost=0.002)
+        return _result(f"{model} answer")
+
+    _insert_run(conn, RUN_ID, "local", "qwen3:1.7b", "local answer")
+    _judge(
+        conn, tracer, routing_yaml, fake_send,
+        tier_chosen="local", model_id="qwen3:1.7b", output_text="local answer",
+    )
+
+    run = _fetch_run(conn, RUN_ID)
+    assert run["escalated"] == 1
+    assert run["tier_chosen"] == "opus"
+    assert run["output_text"] == "opus answer"
+    assert len(json.loads(run["escalation_chain"])) == 2
+    assert run["judge_score"] is None  # opus's answer was never judged; 2 described a discarded answer
+    assert run["judge_label"] == "escalated"
+
+
+def test_tier_map_changes_the_model_used_for_judging_and_escalation(conn, tracer, routing_yaml):
+    config = yaml.safe_load(routing_yaml.read_text(encoding="utf-8"))
+    config["tier_map"]["sonnet"] = "sonnet-alt"
+    routing_yaml.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
+
+    seen = []
+
+    def fake_send(prompt, model):
+        seen.append(model)
+        if "STRICT JSON" in prompt:
+            return _result('{"score": 2, "reason": "weak"}' if model == "sonnet-alt" else '{"score": 5, "reason": "ok"}')
+        return _result(f"{model} answer")
+
+    from task_router.registry import Registry
+
+    registry = load_registry()
+    registry = Registry(models=registry.models + (
+        type(registry.models[1])("claude_cli", "sonnet-alt", "sonnet", 2.0, 10.0),
+    ))
+    _insert_run(conn, RUN_ID, "local", "qwen3:1.7b", "local answer")
+    judge_module.judge_and_escalate(
+        conn=conn, tracer=tracer, parent_span_context=_root_span_context(),
+        send_fn=fake_send, registry=registry, routing_config_path=routing_yaml,
+        run_id=RUN_ID, prompt="Summarise this.", use_case="summarise",
+        tier_chosen="local", model_id="qwen3:1.7b", output_text="local answer",
+    )
+
+    assert "sonnet-alt" in seen and "sonnet" not in seen
+    assert _fetch_run(conn, RUN_ID)["model_used"] == "sonnet-alt"

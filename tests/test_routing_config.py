@@ -19,7 +19,7 @@ def routing_yaml(tmp_path):
 def test_load_config_reads_the_shape_from_tech_scope(routing_yaml):
     config = routing_config.load_config(routing_yaml)
     assert config["tier_map"] == {"local": "qwen3:1.7b", "sonnet": "sonnet", "opus": "opus"}
-    assert config["judge_sample_rate"] == 1.0
+    assert config["judge_sample_rate"] == 0.2  # shipped default; battery.py sets 1.0 itself
     assert config["use_cases"]["classify"]["judge_threshold"] == 5
 
 

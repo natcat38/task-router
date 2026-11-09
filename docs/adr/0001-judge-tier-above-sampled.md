@@ -4,9 +4,9 @@
 Accepted
 
 ## Context
-The router needs a quality check on routed answers so bad cheap-tier answers get caught and escalated. The original design (`task-router-artifact.md` §01–§02, the shared "Glitch Cat Club" artifact) used a single all-Opus judge for every tier: local and Sonnet answers were both scored by Opus, with sampling framed as a future optimization ("proof verified 100%; in production verify a sample and dial down as trust grows," §02).
+The router needs a quality check on routed answers so bad cheap-tier answers get caught and escalated. The original design (a shared router write-up this project started from) used a single all-Opus judge for every tier: local and Sonnet answers were both scored by Opus, with sampling framed as a future optimization (verify every request while proving the design, then dial the sample down as trust grows).
 
-That design has a bias problem the artifact never addresses: when the router picks Sonnet, having Sonnet judge Sonnet's own answer is self-grading, and self-grading bias is well documented (`REFUTATIONS.md` #15). An all-Opus judge avoids self-grading only by cost — every judged request pays for an Opus call regardless of which tier answered, which erases the point of routing to a cheap tier in the first place.
+That design has a bias problem the artifact never addresses: when the router picks Sonnet, having Sonnet judge Sonnet's own answer is self-grading, and self-grading bias is well documented. An all-Opus judge avoids self-grading only by cost — every judged request pays for an Opus call regardless of which tier answered, which erases the point of routing to a cheap tier in the first place.
 
 ## Decision
 The async judge is always the tier **one above** the tier that answered: local answers are judged by Sonnet, Sonnet answers are judged by Opus, Opus answers are unjudged (there is no tier above Opus). Judging runs at a configurable `judge_sample_rate` in `routing.yaml`, set to 1.0 for the initial battery so every routed answer is checked while the classifier is unproven; it is expected to drop as trust in the classifier grows.
@@ -15,7 +15,7 @@ The async judge is always the tier **one above** the tier that answered: local a
 - No tier ever grades its own output, which removes the self-grading bias present in same-tier judging.
 - Opus answers go unjudged by construction — there is no tier above Opus to catch a bad Opus answer. This is accepted as a gap, not solved here.
 - Judge tokens are counted in the savings figure. A local-tier answer that gets judged by Sonnet still costs one Sonnet call, so the "saved vs all-Opus" stat is reported both with and without judge tokens included; reporting only the without-judge number would overstate savings.
-- The classifier is a cheap surface-feature first pass (length, verbs, constraints, context, format, reasoning words, questions, numbers) and cannot see semantic traps by construction (`REFUTATIONS.md` #14). Trap detection is the judge's job, not the classifier's — a trap that slips past classification is still caught (and escalated) by the tier-above judge scoring it low. The README and this ADR both state this explicitly so a reviewer does not mistake trap-catching for a classifier feature.
+- The classifier is a cheap surface-feature first pass (length, verbs, constraints, context, format, reasoning words, questions, numbers) and cannot see semantic traps by construction. Trap detection is the judge's job, not the classifier's — a trap that slips past classification is still caught (and escalated) by the tier-above judge scoring it low. The README and this ADR both state this explicitly so a reviewer does not mistake trap-catching for a classifier feature.
 
 ## Alternatives Considered
 
@@ -26,5 +26,5 @@ The async judge is always the tier **one above** the tier that answered: local a
 
 ### Same-tier judge (Sonnet judges Sonnet, Opus judges Opus)
 - Pros: cheapest possible judging.
-- Cons: self-grading bias (REFUTATIONS #15) — a model is least likely to catch its own systematic errors.
+- Cons: self-grading bias — a model is least likely to catch its own systematic errors.
 - Rejected on bias grounds alone.

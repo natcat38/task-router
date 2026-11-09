@@ -83,10 +83,11 @@ def test_get_stats_reports_both_saved_pct_fields_and_price_basis(
 
 
 def test_get_stats_incl_judge_differs_when_judge_runs(tmp_path, routing_yaml):
-    # judge_sample_rate=1.0 (routing.yaml's default): every local-tier
+    # judge_sample_rate=1.0 (set below; routing.yaml ships 0.2): every local-tier
     # answer gets judged by sonnet, which costs a real sonnet call even
     # though "ok" isn't parseable as a judge score (ADR 0001 -- judge
     # tokens count against the saving regardless of the score outcome).
+    _set_judge_sample_rate(routing_yaml, 1.0)
     fake = FakeProvider(text="ok", input_tokens=100, output_tokens=50)
     app = create_app(
         db_path=tmp_path / "audit.sqlite",
