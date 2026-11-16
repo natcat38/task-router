@@ -28,7 +28,6 @@ from __future__ import annotations
 
 import json
 import random
-import re
 import sqlite3
 from typing import Optional
 
@@ -42,8 +41,6 @@ from task_router.registry import Registry
 _TIER_ABOVE = {"local": "sonnet", "sonnet": "opus", "opus": None}
 
 DEFAULT_JUDGE_THRESHOLD = 4
-
-_JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
 
 
 def judge_tier_above(tier: str) -> Optional[str]:
@@ -79,13 +76,17 @@ def parse_judge_response(text: str) -> Optional[dict]:
     None, which callers treat as no-score / no-escalation."""
     if not text:
         return None
-    match = _JSON_OBJECT_RE.search(text)
-    if not match:
-        return None
-    try:
-        payload = json.loads(match.group(0))
-    except json.JSONDecodeError:
-        return None
+    # raw_decode parses one object and ignores whatever follows, so trailing
+    # prose with braces or a second object cannot break the first one.
+    payload = None
+    decoder = json.JSONDecoder()
+    idx = text.find("{")
+    while idx != -1:
+        try:
+            payload, _ = decoder.raw_decode(text, idx)
+            break
+        except json.JSONDecodeError:
+            idx = text.find("{", idx + 1)
     if not isinstance(payload, dict):
         return None
     score = payload.get("score")

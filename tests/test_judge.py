@@ -151,6 +151,20 @@ def test_parse_judge_response_extracts_json_from_surrounding_text():
 
 
 @pytest.mark.parametrize(
+    "text",
+    [
+        '{"score": 4, "reason": "ok"}\nNote: I ignored {the typo}.',
+        '```json\n{"score": 4, "reason": "ok"}\n```',
+        '{"score": 4, "reason": "ok"} {"score": 1, "reason": "second"}',
+        'Here is my verdict {as requested}: {"score": 4, "reason": "ok"}',
+        'Verdict follows.\n{"score": 4, "reason": "ok"}',
+    ],
+)
+def test_parse_judge_response_first_object_wins_and_trailing_text_ignored(text):
+    assert judge_module.parse_judge_response(text) == {"score": 4, "reason": "ok"}
+
+
+@pytest.mark.parametrize(
     "garbage",
     [
         "",
